@@ -19,7 +19,10 @@ use crate::{
             api::ServerConversationToken,
             conversation::{AIConversation, AIConversationId},
         },
-        agent_conversations_model::AgentConversationsModel,
+        agent_conversations_model::{
+            entry::AgentConversationEntryId, AgentConversationNavigationSubject,
+            AgentConversationsModel,
+        },
         blocklist::BlocklistAIHistoryModel,
     },
     ui_components::{blended_colors, icons::Icon},
@@ -55,18 +58,20 @@ pub(crate) fn conversation_navigation_action(
     conversation_id: AIConversationId,
     app: &AppContext,
 ) -> WorkspaceAction {
-    AgentConversationsModel::as_ref(app)
-        .get_conversation(&conversation_id)
-        .and_then(|conversation| {
-            conversation.get_open_action(Some(RestoreConversationLayout::SplitPane), app)
-        })
-        .unwrap_or(WorkspaceAction::RestoreOrNavigateToConversation {
-            pane_view_locator: None,
-            window_id: None,
+    AgentConversationsModel::resolve_open_action(
+        AgentConversationNavigationSubject::Entry(AgentConversationEntryId::Conversation(
             conversation_id,
-            terminal_view_id: None,
-            restore_layout: Some(RestoreConversationLayout::SplitPane),
-        })
+        )),
+        Some(RestoreConversationLayout::SplitPane),
+        app,
+    )
+    .unwrap_or(WorkspaceAction::RestoreOrNavigateToConversation {
+        pane_view_locator: None,
+        window_id: None,
+        conversation_id,
+        terminal_view_id: None,
+        restore_layout: Some(RestoreConversationLayout::SplitPane),
+    })
 }
 
 pub(crate) fn parent_conversation_navigation_card(
