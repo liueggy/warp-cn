@@ -10684,6 +10684,7 @@ dependencies = [
  "prost-build",
  "repo_metadata",
  "serde",
+ "shell-words",
  "thiserror 2.0.17",
  "tokio",
  "tokio-util",

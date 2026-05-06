@@ -181,3 +181,89 @@ fn parse_preinstall_missing_status_falls_open() {
     assert_eq!(result.status, PreinstallStatus::Unknown);
     assert!(result.is_supported());
 }
+
+#[test]
+fn install_script_contains_wget_fallback() {
+    let script = install_script();
+    // curl detection
+    assert!(
+        script.contains("command -v curl"),
+        "install script must detect curl availability"
+    );
+    // wget fallback
+    assert!(
+        script.contains("command -v wget"),
+        "install script must detect wget availability"
+    );
+    // Sentinel exit code for "no HTTP client" — must use the shared constant.
+    let exit_sentinel = format!("exit {}", NO_HTTP_CLIENT_EXIT_CODE);
+    assert!(
+        script.contains(&exit_sentinel),
+        "install script must exit with NO_HTTP_CLIENT_EXIT_CODE ({}) when neither curl nor wget is available",
+        NO_HTTP_CLIENT_EXIT_CODE
+    );
+    // The $1 argument path for the SCP fallback.
+    assert!(
+        script.contains("$1"),
+        "install script must support a positional argument for the SCP fallback tarball path"
+    );
+}
+
+#[test]
+fn download_tarball_url_formats_correctly() {
+    let cases = [
+        (
+            RemotePlatform {
+                os: RemoteOs::Linux,
+                arch: RemoteArch::X86_64,
+            },
+            "os=linux",
+            "arch=x86_64",
+        ),
+        (
+            RemotePlatform {
+                os: RemoteOs::Linux,
+                arch: RemoteArch::Aarch64,
+            },
+            "os=linux",
+            "arch=aarch64",
+        ),
+        (
+            RemotePlatform {
+                os: RemoteOs::MacOs,
+                arch: RemoteArch::X86_64,
+            },
+            "os=macos",
+            "arch=x86_64",
+        ),
+        (
+            RemotePlatform {
+                os: RemoteOs::MacOs,
+                arch: RemoteArch::Aarch64,
+            },
+            "os=macos",
+            "arch=aarch64",
+        ),
+    ];
+    for (platform, expected_os, expected_arch) in cases {
+        let url = download_tarball_url(&platform);
+        assert!(
+            url.contains(expected_os),
+            "URL for {:?} must contain {expected_os}, got: {url}",
+            platform.os
+        );
+        assert!(
+            url.contains(expected_arch),
+            "URL for {:?} must contain {expected_arch}, got: {url}",
+            platform.arch
+        );
+        assert!(
+            url.contains("package=tar"),
+            "URL must request tar package: {url}"
+        );
+        assert!(
+            url.contains("channel="),
+            "URL must include a channel parameter: {url}"
+        );
+    }
+}

@@ -2,12 +2,17 @@
 # Installs the Warp remote server binary on a remote host.
 #
 # Placeholders (substituted at runtime by setup.rs):
-#   {download_base_url}  — e.g. https://app.warp.dev/download/cli
-#   {channel}            — stable | preview | dev
-#   {install_dir}        — e.g. ~/.warp/remote-server
-#   {binary_name}        — e.g. oz | oz-dev | oz-preview
-#   {version_query}      — e.g. &version=v0.2026... (empty when no release tag)
-#   {version_suffix}     — e.g. -v0.2026...        (empty when no release tag)
+#   {download_base_url}         — e.g. https://app.warp.dev/download/cli
+#   {channel}                   — stable | preview | dev
+#   {install_dir}               — e.g. ~/.warp/remote-server
+#   {binary_name}               — e.g. oz | oz-dev | oz-preview
+#   {version_query}             — e.g. &version=v0.2026... (empty when no release tag)
+#   {version_suffix}            — e.g. -v0.2026...        (empty when no release tag)
+#   {no_http_client_exit_code}  — exit code when neither curl nor wget is available
+#
+# When invoked with a positional argument ($1), the script skips the
+# download phase and extracts from the provided tarball path instead.
+# This is used by the SCP upload fallback on the client side.
 set -e
 
 arch=$(uname -m)
@@ -40,8 +45,23 @@ cleanup() {
 }
 trap cleanup EXIT
 
-curl -fSL "{download_base_url}?package=tar&os=$os_name&arch=$arch_name&channel={channel}{version_query}" \
-  -o "$tmpdir/oz.tar.gz"
+if [ -n "$1" ]; then
+  # SCP fallback: tarball already uploaded by the client.
+  mv "$1" "$tmpdir/oz.tar.gz"
+else
+  # Normal path: download via curl or wget.
+  url="{download_base_url}?package=tar&os=$os_name&arch=$arch_name&channel={channel}{version_query}"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fSL "$url" -o "$tmpdir/oz.tar.gz"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$tmpdir/oz.tar.gz" "$url"
+  else
+    echo "error: neither curl nor wget is available" >&2
+    exit {no_http_client_exit_code}
+  fi
+fi
+
 tar -xzf "$tmpdir/oz.tar.gz" -C "$tmpdir"
 
 bin=$(find "$tmpdir" -type f -name 'oz*' ! -name '*.tar.gz' | head -n1)

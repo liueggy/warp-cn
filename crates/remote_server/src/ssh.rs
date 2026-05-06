@@ -153,3 +153,87 @@ pub async fn run_ssh_script(socket_path: &Path, script: &str, timeout: Duration)
         .map_err(|_| anyhow!("Script timed out after {timeout:?}"))?
         .map_err(|e| anyhow!("Script failed: {e}"))
 }
+
+/// Like [`run_ssh_script`], but passes positional arguments to the remote
+/// `bash` invocation (`bash -s -- <args>`). Used by the SCP install
+/// fallback to tell the install script where the uploaded tarball lives.
+pub async fn run_ssh_script_with_args(
+    socket_path: &Path,
+    script: &str,
+    args: &[&str],
+    timeout: Duration,
+) -> Result<Output> {
+    use std::process::Stdio;
+
+    let mut remote_cmd = "bash -s --".to_string();
+    for arg in args {
+        remote_cmd.push(' ');
+        remote_cmd.push_str(&shell_words::quote(arg));
+    }
+
+    let mut child = Command::new("ssh")
+        .args(ssh_args(socket_path))
+        .arg(&remote_cmd)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .spawn()
+        .map_err(|e| anyhow!("Failed to spawn SSH for script: {e}"))?;
+
+    if let Some(mut stdin) = child.stdin.take() {
+        use futures_lite::io::AsyncWriteExt;
+        stdin
+            .write_all(script.as_bytes())
+            .await
+            .map_err(|e| anyhow!("Failed to write script to stdin: {e}"))?;
+        drop(stdin);
+    }
+
+    child
+        .output()
+        .with_timeout(timeout)
+        .await
+        .map_err(|_| anyhow!("Script timed out after {timeout:?}"))?
+        .map_err(|e| anyhow!("Script failed: {e}"))
+}
+
+/// Upload a local file to the remote host via `scp`, reusing the
+/// ControlMaster socket for authentication. Returns `Ok(())` on success
+/// or an error describing the failure.
+pub async fn scp_upload(
+    socket_path: &Path,
+    local_path: &Path,
+    remote_path: &str,
+    timeout: Duration,
+) -> Result<()> {
+    async {
+        Command::new("scp")
+            .arg("-o")
+            .arg(format!("ControlPath={}", socket_path.display()))
+            .arg("-o")
+            .arg("ControlMaster=no")
+            .arg("-o")
+            .arg("ConnectTimeout=15")
+            .arg(local_path.as_os_str())
+            .arg(format!("placeholder@placeholder:{remote_path}"))
+            .kill_on_drop(true)
+            .output()
+            .await
+    }
+    .with_timeout(timeout)
+    .await
+    .map_err(|_| anyhow!("scp timed out after {timeout:?}"))?
+    .map_err(|e| anyhow!("scp failed to execute: {e}"))
+    .and_then(|output| {
+        if output.status.success() {
+            Ok(())
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            Err(anyhow!(
+                "scp failed (exit {:?}): {stderr}",
+                output.status.code()
+            ))
+        }
+    })
+}

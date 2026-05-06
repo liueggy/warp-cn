@@ -5,7 +5,7 @@
 //! whose stdin/stdout become the protocol channel.
 use std::fmt;
 use std::future::Future;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::sync::Arc;
 
@@ -21,6 +21,8 @@ use remote_server::setup::{
 use remote_server::ssh::ssh_args;
 use remote_server::transport::{Connection, RemoteTransport};
 
+use std::sync::Mutex;
+
 /// SSH transport: connects via a ControlMaster socket.
 ///
 /// `socket_path` is the local Unix socket created by the ControlMaster
@@ -31,6 +33,9 @@ use remote_server::transport::{Connection, RemoteTransport};
 pub struct SshTransport {
     socket_path: PathBuf,
     auth_context: Arc<RemoteServerAuthContext>,
+    /// Detected remote platform, set after `detect_platform` succeeds.
+    /// Used by the SCP install fallback to construct the download URL.
+    platform: Arc<Mutex<Option<RemotePlatform>>>,
 }
 
 impl fmt::Debug for SshTransport {
@@ -46,6 +51,7 @@ impl SshTransport {
         Self {
             socket_path,
             auth_context,
+            platform: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -80,8 +86,9 @@ impl RemoteTransport for SshTransport {
         &self,
     ) -> Pin<Box<dyn Future<Output = Result<RemotePlatform, String>> + Send>> {
         let socket_path = self.socket_path.clone();
+        let platform_slot = self.platform.clone();
         Box::pin(async move {
-            match remote_server::ssh::run_ssh_command(
+            let result = match remote_server::ssh::run_ssh_command(
                 &socket_path,
                 "uname -sm",
                 remote_server::setup::CHECK_TIMEOUT,
@@ -98,7 +105,12 @@ impl RemoteTransport for SshTransport {
                     Err(format!("uname -sm exited with code {code}: {stderr}"))
                 }
                 Err(e) => Err(format!("{e:#}")),
+            };
+            // Stash the detected platform for the SCP fallback.
+            if let Ok(ref p) = result {
+                *platform_slot.lock().unwrap() = Some(p.clone());
             }
+            result
         })
     }
 
@@ -193,6 +205,7 @@ impl RemoteTransport for SshTransport {
 
     fn install_binary(&self) -> Pin<Box<dyn Future<Output = Result<(), String>> + Send>> {
         let socket_path = self.socket_path.clone();
+        let platform_slot = self.platform.clone();
         Box::pin(async move {
             let script = remote_server::setup::install_script();
             log::info!(
@@ -207,6 +220,21 @@ impl RemoteTransport for SshTransport {
             .await
             {
                 Ok(output) if output.status.success() => Ok(()),
+                Ok(output)
+                    if output.status.code()
+                        == Some(remote_server::setup::NO_HTTP_CLIENT_EXIT_CODE) =>
+                {
+                    log::info!("Remote has no curl/wget, falling back to SCP upload");
+                    let platform = platform_slot.lock().unwrap().clone();
+                    let Some(platform) = platform else {
+                        return Err(
+                            "SCP fallback requires platform detection to have succeeded".into()
+                        );
+                    };
+                    scp_install_fallback(&socket_path, &platform, &script)
+                        .await
+                        .map_err(|e| format!("{e:#}"))
+                }
                 Ok(output) => {
                     let code = output.status.code().unwrap_or(-1);
                     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -297,6 +325,72 @@ impl RemoteTransport for SshTransport {
             // No exit status available — optimistically allow reconnect.
             None => true,
         }
+    }
+}
+
+/// SCP install fallback: downloads the tarball locally, uploads it to
+/// the remote via SCP, then re-invokes the install script with the
+/// staging path as $1 so the shared extraction tail runs.
+async fn scp_install_fallback(
+    socket_path: &Path,
+    platform: &RemotePlatform,
+    install_script: &str,
+) -> anyhow::Result<()> {
+    use std::process::Stdio;
+
+    let url = remote_server::setup::download_tarball_url(platform);
+    let staging_path = remote_server::setup::remote_tarball_staging_path();
+    let timeout = remote_server::setup::SCP_INSTALL_TIMEOUT;
+
+    // 1. Download the tarball locally into a temp directory.
+    let tmp_dir =
+        tempfile::tempdir().map_err(|e| anyhow::anyhow!("Failed to create local temp dir: {e}"))?;
+    let local_tarball = tmp_dir.path().join("oz.tar.gz");
+
+    log::info!("Downloading tarball locally from {url}");
+    let output = command::r#async::Command::new("curl")
+        .arg("-fSL")
+        .arg(&url)
+        .arg("-o")
+        .arg(&local_tarball)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .output()
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to spawn local curl: {e}"))?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(anyhow::anyhow!(
+            "Local curl failed (exit {:?}): {stderr}",
+            output.status.code()
+        ));
+    }
+
+    // 2. Upload to the remote via SCP.
+    log::info!("Uploading tarball to remote at {staging_path}");
+    remote_server::ssh::scp_upload(socket_path, &local_tarball, &staging_path, timeout).await?;
+
+    // 3. Re-invoke the install script with the staging path as $1.
+    //    The script's `[ -n "$1" ]` branch will mv the tarball and
+    //    run the shared extraction tail.
+    let staging_path_expanded = staging_path.replace("~", "$HOME");
+    log::info!("Running extraction via install script with tarball at {staging_path_expanded}");
+    let output = remote_server::ssh::run_ssh_script_with_args(
+        socket_path,
+        install_script,
+        &[&staging_path_expanded],
+        timeout,
+    )
+    .await?;
+    if output.status.success() {
+        Ok(())
+    } else {
+        let code = output.status.code().unwrap_or(-1);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(anyhow::anyhow!(
+            "Extraction script failed (exit {code}): {stderr}"
+        ))
     }
 }
 

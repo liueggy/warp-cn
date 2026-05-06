@@ -1,0 +1,9 @@
+services:
+  wget-only:
+    build: ./wget-only
+    ports:
+      - "2201:22"
+  no-http-client:
+    build: ./no-http-client
+    ports:
+      - "2202:22"
