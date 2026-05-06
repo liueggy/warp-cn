@@ -75,15 +75,15 @@ const BODY_FONT_SIZE: f32 = 13.;
 const TITLE_FONT_SIZE: f32 = 16.;
 const ZERO_STATE_HELP_TEXT_FONT_SIZE: f32 = 12.;
 
-const ZERO_STATE_HELP_TEXT: &str = "Shift + ctrl + space a block or text selection to ask Warp AI.";
-const SCRIPT_ZERO_STATE_PROMPT: &str = "Write a script to connect to an AWS EC2 instance.";
-const GIT_ZERO_STATE_PROMPT: &str = "How do I undo the most recent commits in git?";
-const FILES_ZERO_STATE_PROMPT: &str = "How do I find all files containing specific text?";
+const ZERO_STATE_HELP_TEXT: &str = "按 Shift + Ctrl + Space 选中代码块或文本，向 Warp AI 提问。";
+const SCRIPT_ZERO_STATE_PROMPT: &str = "写一个连接 AWS EC2 实例的脚本。";
+const GIT_ZERO_STATE_PROMPT: &str = "如何撤销 git 最近的提交？";
+const FILES_ZERO_STATE_PROMPT: &str = "如何查找所有包含特定文本的文件？";
 
 // The placeholder texts are prepended with a space to give them cushion from the cursor.
-const INIT_PLACEHOLDER_TEXT: &str = " Ask a question...";
-const FOLLOWUP_PLACEHOLDER_TEXT: &str = " Type a response or click one above...";
-const RESTART_BUTTON_TEXT: &str = "Restart";
+const INIT_PLACEHOLDER_TEXT: &str = " 提问...";
+const FOLLOWUP_PLACEHOLDER_TEXT: &str = " 输入回复或点击上方建议...";
+const RESTART_BUTTON_TEXT: &str = "重新开始";
 
 const ASK_AI_BLOCK_INPUT_LIMIT: usize = 100;
 
@@ -151,28 +151,28 @@ pub fn init(app: &mut AppContext) {
     app.register_fixed_bindings([FixedBinding::custom(
         CustomAction::CloseCurrentSession,
         AIAssistantAction::ClosePanel,
-        "Close Warp AI",
+        "关闭 Warp AI",
         id!("AIAssistantPanel"),
     )]);
 
     app.register_editable_bindings([
         EditableBinding::new(
             "ai_assistant_panel:focus_terminal_input",
-            "Focus Terminal Input From Warp AI",
+            "从 Warp AI 切换到终端输入",
             AIAssistantAction::FocusTerminalInput,
         )
         .with_context_predicate(id!("AIAssistantPanel"))
         .with_key_binding(cmd_or_ctrl_shift("l")),
         EditableBinding::new(
             "ai_assistant_panel:reset_context",
-            "Restart Warp AI",
+            "重启 Warp AI",
             AIAssistantAction::ResetContext,
         )
         .with_context_predicate(id!("AIAssistantPanel"))
         .with_key_binding("ctrl-l"),
         EditableBinding::new(
             "ai_assistant_panel:reset_context",
-            "Restart Warp AI",
+            "重启 Warp AI",
             AIAssistantAction::ResetContext,
         )
         .with_context_predicate(id!("AIAssistantPanel"))
@@ -788,7 +788,7 @@ impl AIAssistantPanelView {
                 ..Default::default()
             };
             ui_builder
-                .tool_tip("Copy transcript to clipboard".to_owned())
+                .tool_tip("复制对话记录到剪贴板".to_owned())
                 .with_style(tool_tip_style)
                 .build()
                 .finish()
@@ -846,7 +846,7 @@ impl AIAssistantPanelView {
             .with_children([
                 Container::new(
                     Text::new_inline(
-                        "Character limit exceeded.",
+                        "已超出字符限制。",
                         appearance.ui_font_family(),
                         BODY_FONT_SIZE,
                     )
