@@ -22,6 +22,10 @@ pub struct ApiKeys {
     pub anthropic: Option<String>,
     pub openai: Option<String>,
     pub open_router: Option<String>,
+    /// 胜算云（SSYCloud）API Key，OpenAI 兼容接口
+    pub ssy_cloud: Option<String>,
+    /// 自定义 OpenAI 兼容 API 端点（留空则使用胜算云默认端点）
+    pub custom_endpoint: Option<String>,
 }
 
 impl ApiKeys {
@@ -30,6 +34,23 @@ impl ApiKeys {
             || self.anthropic.is_some()
             || self.google.is_some()
             || self.open_router.is_some()
+            || self.ssy_cloud.is_some()
+    }
+
+    /// 返回实际使用的 API key（优先胜算云，其次自定义，最后 OpenAI）
+    pub fn effective_openai_key(&self) -> Option<&str> {
+        self.ssy_cloud
+            .as_deref()
+            .or(self.openai.as_deref())
+    }
+
+    /// 返回实际使用的端点（优先自定义，其次胜算云默认）
+    pub const SSY_DEFAULT_ENDPOINT: &'static str = "https://router.shengsuanyun.com/api/v1";
+
+    pub fn effective_endpoint(&self) -> &str {
+        self.custom_endpoint
+            .as_deref()
+            .unwrap_or(Self::SSY_DEFAULT_ENDPOINT)
     }
 }
 
@@ -89,6 +110,18 @@ impl ApiKeyManager {
 
     pub fn set_open_router_key(&mut self, key: Option<String>, ctx: &mut ModelContext<Self>) {
         self.keys.open_router = key;
+        ctx.emit(ApiKeyManagerEvent::KeysUpdated);
+        self.write_keys_to_secure_storage(ctx);
+    }
+
+    pub fn set_ssy_cloud_key(&mut self, key: Option<String>, ctx: &mut ModelContext<Self>) {
+        self.keys.ssy_cloud = key;
+        ctx.emit(ApiKeyManagerEvent::KeysUpdated);
+        self.write_keys_to_secure_storage(ctx);
+    }
+
+    pub fn set_custom_endpoint(&mut self, endpoint: Option<String>, ctx: &mut ModelContext<Self>) {
+        self.keys.custom_endpoint = endpoint;
         ctx.emit(ApiKeyManagerEvent::KeysUpdated);
         self.write_keys_to_secure_storage(ctx);
     }

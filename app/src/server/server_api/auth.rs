@@ -242,7 +242,9 @@ impl AuthClient for ServerApi {
 
     async fn get_or_refresh_access_token(&self) -> Result<AuthToken> {
         if cfg!(feature = "skip_login") {
-            bail!("skip_login enabled; failing all authenticated requests");
+            // 本地模式（warp-cn）：不使用 Firebase 认证，直接返回 NoAuth
+            // 请求将使用 WARP_SERVER_URL 环境变量指定的自定义服务器（或胜算云代理）
+            return Ok(AuthToken::NoAuth);
         }
 
         let Some(credentials) = self.auth_state.credentials() else {
