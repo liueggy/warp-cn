@@ -73,38 +73,36 @@ use warpui::fonts::Weight;
 
 const FONT_SIZE: f32 = 12.;
 
-const SAFE_MODE_TITLE: &str = "Secret redaction";
+const SAFE_MODE_TITLE: &str = "敏感信息脱敏";
 static SAFE_MODE_DESCRIPTION: LazyLock<&'static str> = LazyLock::new(|| {
-    "When this setting is enabled, Warp will scan blocks, the contents of \
-        Warp Drive objects, and Oz prompts for potential sensitive \
-        information and prevent saving or sending this data to any \
-        servers. You can customize this list via regexes."
+    "启用后，Warp 将扫描块内容、Warp Drive 对象和 Oz 提示，\
+        识别潜在的敏感信息，并阻止将该数据保存或发送到任何服务器。\
+        您可以通过正则表达式自定义此列表。"
 });
-const USER_SECRET_REGEX_TITLE: &str = "Custom secret redaction";
+const USER_SECRET_REGEX_TITLE: &str = "自定义敏感信息脱敏";
 const USER_SECRET_REGEX_DESCRIPTION: &str =
-    "Use regex to define additional secrets or data you'd like to redact. This will take effect \
-    when the next command runs. You can use the inline (?i) flag as a prefix to your regex \
-    to make it case-insensitive.";
+    "使用正则表达式定义您希望脱敏的其他敏感信息或数据。下次命令运行时生效。\
+    您可以在正则表达式前使用内联 (?i) 标志来忽略大小写。";
 const TELEMETRY_DESCRIPTION_OLD: &str =
-    "App analytics help us make the product better for you. We only collect \
-    app usage metadata, never console input or output.";
-const TELEMETRY_TITLE: &str = "Help improve Warp";
+    "应用分析帮助我们改善您的产品体验。我们仅收集应用使用元数据，\
+    不收集终端输入或输出。";
+const TELEMETRY_TITLE: &str = "帮助改善 Warp";
 const TELEMETRY_DESCRIPTION: &str =
-    "App analytics help us make the product better for you. We may collect \
-    certain console interactions to improve Warp's AI capabilities.";
+    "应用分析帮助我们改善您的产品体验。我们可能会收集\
+    某些终端交互数据以提升 Warp 的 AI 能力。";
 const TELEMETRY_FREE_TIER_NOTE: &str =
-    "On the free tier, analytics must be enabled to use AI features.";
+    "免费版用户必须启用分析才能使用 AI 功能。";
 const TELEMETRY_DOCS_URL: &str =
     "https://docs.warp.dev/support-and-community/privacy-and-security/privacy#what-telemetry-data-does-warp-collect-and-why";
 
-const DATA_MANAGEMENT_TITLE: &str = "Manage your data";
+const DATA_MANAGEMENT_TITLE: &str = "管理您的数据";
 const DATA_MANAGEMENT_DESCRIPTION: &str =
-    "At any time, you may choose to delete your Warp account permanently. \
-    You will no longer be able to use Warp.";
-const DATA_MANAGEMENT_LINK_TEXT: &str = "Visit the data management page";
+    "您可以随时选择永久删除您的 Warp 账号。\
+    删除后，您将无法继续使用 Warp。";
+const DATA_MANAGEMENT_LINK_TEXT: &str = "访问数据管理页面";
 
-const PRIVACY_POLICY_TITLE: &str = "Privacy policy";
-const PRIVACY_POLICY_LINK_TEXT: &str = "Read Warp's privacy policy";
+const PRIVACY_POLICY_TITLE: &str = "隐私政策";
+const PRIVACY_POLICY_LINK_TEXT: &str = "阅读 Warp 隐私政策";
 
 pub fn data_management_url(custom_token: Option<&str>) -> String {
     match custom_token {
@@ -168,7 +166,7 @@ impl PrivacyPageView {
         });
 
         let add_regex_modal_view = ctx.add_typed_action_view(|ctx| {
-            Modal::new(Some("Add regex pattern".to_string()), add_regex_body, ctx)
+            Modal::new(Some("添加正则表达式规则".to_string()), add_regex_body, ctx)
                 .with_modal_style(UiComponentStyles {
                     width: Some(600.),
                     height: Some(400.),
@@ -772,7 +770,7 @@ impl SecretRedactionWidget {
             .count();
 
         let personal_tab = self.render_tab(
-            "Personal".to_string(),
+            "个人".to_string(),
             personal_count,
             SecretRedactionTab::Personal,
             active_tab == SecretRedactionTab::Personal,
@@ -783,7 +781,7 @@ impl SecretRedactionWidget {
         let is_enterprise_tab_active = active_tab == SecretRedactionTab::Enterprise;
 
         let enterprise_tab = self.render_tab(
-            "Enterprise".to_string(),
+            "企业版".to_string(),
             enterprise_count,
             SecretRedactionTab::Enterprise,
             is_enterprise_tab_active,
@@ -799,7 +797,7 @@ impl SecretRedactionWidget {
         if is_enterprise_tab_active {
             row.add_child(Shrinkable::new(1., Empty::new().finish()).finish());
             row.add_child(self.render_info(
-                "Enterprise secret redaction cannot be modified.".to_string(),
+                "企业版敏感信息脱敏设置不可修改。".to_string(),
                 appearance,
             ));
         }
@@ -1018,7 +1016,7 @@ impl SecretRedactionWidget {
                         .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
                         .with_cross_axis_alignment(CrossAxisAlignment::Center)
                         .with_child(
-                            self.render_section_title("Recommended".to_string(), appearance),
+                            self.render_section_title("推荐".to_string(), appearance),
                         )
                         .with_child(
                             Container::new(
@@ -1194,7 +1192,7 @@ impl SettingsWidget for SecretRedactionWidget {
                     Container::new({
                         if is_enterprise_enabled {
                             self.render_info(
-                                "Enabled by your organization.".to_string(),
+                                "已由您的组织启用。".to_string(),
                                 appearance,
                             )
                         } else {
@@ -1247,7 +1245,7 @@ impl SettingsWidget for SecretRedactionWidget {
 
             // Create the label with local-only icon if needed
             let label_with_icon = super::settings_page::render_dropdown_item_label(
-                "Secret visual redaction mode".to_string(),
+                "敏感信息视觉脱敏模式".to_string(),
                 None,
                 local_only_icon_state,
                 None,
@@ -1521,7 +1519,7 @@ impl SettingsWidget for AppAnalyticsWidget {
         } else {
             switch
                 .with_tooltip(TooltipConfig {
-                    text: "This setting is managed by your organization.".to_string(),
+                    text: "此设置由您的组织管理。".to_string(),
                     styles: ui_builder.default_tool_tip_styles(),
                 })
                 .disable()
@@ -1580,7 +1578,7 @@ impl SettingsWidget for AppAnalyticsWidget {
             Align::new(
                 ui_builder
                     .link(
-                        "Read more about Warp's use of data".into(),
+                        "阅读 Warp 的数据使用说明".into(),
                         Some(TELEMETRY_DOCS_URL.into()),
                         None,
                         self.docs_link_mouse_state.clone(),
@@ -1630,7 +1628,7 @@ impl SettingsWidget for CrashReportsWidget {
         let privacy_settings = PrivacySettings::as_ref(app);
         Flex::column()
             .with_child(render_body_item::<PrivacyPageAction>(
-                "Send crash reports".into(),
+                "发送崩溃报告".into(),
                 None,
                 // Crash report state is always synced to cloud, so no need to show local only icon.
                 LocalOnlyIconState::Hidden,
@@ -1734,7 +1732,7 @@ impl SettingsWidget for CloudConversationStorageWidget {
         } else {
             switch
                 .with_tooltip(TooltipConfig {
-                    text: "This setting is managed by your organization.".to_string(),
+                    text: "此设置由您的组织管理。".to_string(),
                     styles: ui_builder.default_tool_tip_styles(),
                 })
                 .disable()
@@ -1744,7 +1742,7 @@ impl SettingsWidget for CloudConversationStorageWidget {
 
         Flex::column()
             .with_child(render_body_item::<PrivacyPageAction>(
-                "Store AI conversations in the cloud".into(),
+                "在云端存储 AI 对话".into(),
                 None,
                 LocalOnlyIconState::Hidden,
                 toggle_state,
@@ -1808,7 +1806,7 @@ impl SettingsWidget for NetworkLogWidget {
         let ui_builder = appearance.ui_builder();
         Flex::column()
             .with_child(render_body_item::<PrivacyPageAction>(
-                "Network log console".into(),
+                "网络日志控制台".into(),
                 None,
                 // Not rendering a setting, so no need to show local only icon state.
                 LocalOnlyIconState::Hidden,
