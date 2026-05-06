@@ -93,7 +93,7 @@ enum TaskFetchState {
 const MAX_PERSONAL_TASKS: usize = 200;
 const MAX_TEAM_TASKS: usize = 300;
 
-#[derive(PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SessionStatus {
     Available,
     Expired,
