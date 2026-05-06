@@ -230,21 +230,30 @@ use std::fmt::{self, Display};
 impl Display for SettingsSection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SettingsSection::BillingAndUsage => write!(f, "Billing and usage"),
-            SettingsSection::Keybindings => write!(f, "Keyboard shortcuts"),
-            SettingsSection::SharedBlocks => write!(f, "Shared blocks"),
-            SettingsSection::MCPServers => write!(f, "MCP Servers"),
+            SettingsSection::About => write!(f, "关于"),
+            SettingsSection::Account => write!(f, "账号"),
+            SettingsSection::AI => write!(f, "AI"),
+            SettingsSection::Appearance => write!(f, "外观"),
+            SettingsSection::BillingAndUsage => write!(f, "计费与用量"),
+            SettingsSection::Code => write!(f, "代码"),
+            SettingsSection::Features => write!(f, "功能"),
+            SettingsSection::Keybindings => write!(f, "键盘快捷键"),
+            SettingsSection::MCPServers => write!(f, "MCP 服务器"),
+            SettingsSection::Privacy => write!(f, "隐私"),
+            SettingsSection::Referrals => write!(f, "推荐"),
+            SettingsSection::SharedBlocks => write!(f, "共享块"),
+            SettingsSection::Teams => write!(f, "团队"),
             SettingsSection::WarpDrive => write!(f, "Warp Drive"),
+            SettingsSection::Warpify => write!(f, "Warpify"),
             SettingsSection::WarpAgent => write!(f, "Warp Agent"),
-            SettingsSection::AgentProfiles => write!(f, "Profiles"),
-            SettingsSection::AgentMCPServers => write!(f, "MCP servers"),
-            SettingsSection::Knowledge => write!(f, "Knowledge"),
-            SettingsSection::ThirdPartyCLIAgents => write!(f, "Third party CLI agents"),
-            SettingsSection::CodeIndexing => write!(f, "Indexing and projects"),
-            SettingsSection::EditorAndCodeReview => write!(f, "Editor and Code Review"),
-            SettingsSection::CloudEnvironments => write!(f, "Environments"),
+            SettingsSection::AgentProfiles => write!(f, "配置文件"),
+            SettingsSection::AgentMCPServers => write!(f, "MCP 服务器"),
+            SettingsSection::Knowledge => write!(f, "知识库"),
+            SettingsSection::ThirdPartyCLIAgents => write!(f, "第三方 CLI 代理"),
+            SettingsSection::CodeIndexing => write!(f, "索引与项目"),
+            SettingsSection::EditorAndCodeReview => write!(f, "编辑器与代码审查"),
+            SettingsSection::CloudEnvironments => write!(f, "环境"),
             SettingsSection::OzCloudAPIKeys => write!(f, "Oz Cloud API Keys"),
-            _ => write!(f, "{self:?}"),
         }
     }
 }
@@ -1184,24 +1193,24 @@ impl SettingsView {
             SettingsPage::new(about_page_handle),
         ]);
 
-        // Build sidebar nav items. AI page is presented as an "Agents" umbrella
+        // Build sidebar nav items. AI page is presented as an "AI 助手" umbrella
         // with subpages; the actual AI SettingsPage is hidden from direct sidebar listing.
         let mut nav_items = vec![
             SettingsNavItem::Page(SettingsSection::Account),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Agents",
+                "AI 助手",
                 SettingsSection::ai_subpages().to_vec(),
             )),
             SettingsNavItem::Page(SettingsSection::BillingAndUsage),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Code",
+                "代码",
                 vec![
                     SettingsSection::CodeIndexing,
                     SettingsSection::EditorAndCodeReview,
                 ],
             )),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Cloud platform",
+                "云平台",
                 vec![
                     SettingsSection::CloudEnvironments,
                     SettingsSection::OzCloudAPIKeys,
@@ -2658,7 +2667,7 @@ impl BackingView for SettingsView {
         _ctx: &view::HeaderRenderContext<'_>,
         _app: &AppContext,
     ) -> view::HeaderContent {
-        view::HeaderContent::simple("Settings")
+        view::HeaderContent::simple("设置")
     }
 
     fn set_focus_handle(&mut self, focus_handle: PaneFocusHandle, _ctx: &mut ViewContext<Self>) {
