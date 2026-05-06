@@ -261,6 +261,10 @@ impl ChannelState {
     }
 
     pub fn server_root_url() -> Cow<'static, str> {
+        // warp-cn: 支持通过环境变量覆盖服务器地址（用于接入胜算云代理或自定义服务器）
+        if let Ok(url) = std::env::var("WARP_SERVER_URL") {
+            return Cow::Owned(url);
+        }
         cfg_if::cfg_if! {
             if #[cfg(feature = "test-util")] {
                 Cow::Owned(MOCK_SERVER_URL.clone())
