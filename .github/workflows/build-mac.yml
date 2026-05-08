@@ -1,0 +1,166 @@
+# Build macOS DMG for warp-cn
+# Triggered manually via workflow_dispatch
+name: Build macOS DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to upload DMG to (e.g. v0.2.0)'
+        required: true
+        default: 'v0.2.0'
+      arch:
+        description: 'Architecture to build (aarch64 or x86_64)'
+        required: true
+        default: 'aarch64'
+        type: choice
+        options:
+          - aarch64
+          - x86_64
+
+env:
+  CARGO_TERM_COLOR: always
+  MACOSX_DEPLOYMENT_TARGET: "10.14"
+
+jobs:
+  build-mac-dmg:
+    name: Build macOS DMG (${{ inputs.arch }})
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup update stable
+          rustup default stable
+
+      - name: Add Rust target
+        if: inputs.arch != 'aarch64'
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Install protoc
+        run: brew install protobuf
+
+      - name: Install cargo-bundle
+        run: |
+          cargo_location=$(dirname "$(which cargo)")
+          if test -f "$cargo_location/cargo-bundle"; then
+            echo "cargo-bundle already exists"
+          else
+            curl https://storage.googleapis.com/cached_crates/cargo-bundle.zip --output cargo-bundle.zip
+            unzip -o cargo-bundle.zip
+            chmod 755 cargo-bundle
+            cp cargo-bundle "$cargo_location"
+          fi
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: macos-${{ inputs.arch }}
+
+      - name: Build and bundle
+        id: bundle
+        run: |
+          if [ "${{ inputs.arch }}" = "aarch64" ]; then
+            TARGET="aarch64-apple-darwin"
+          else
+            TARGET="x86_64-apple-darwin"
+          fi
+
+          FEATURES="release_bundle,extern_plist,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
+
+          export MACOSX_DEPLOYMENT_TARGET="10.14"
+          export GIT_RELEASE_TAG="${{ inputs.release_tag }}"
+
+          # Build the binary
+          cd app
+          cargo build --profile release-lto --bin warp-oss --target "$TARGET" --features "$FEATURES"
+          cd ..
+
+          # Bundle into .app using cargo-bundle
+          cd app
+          cargo bundle --profile release-lto --bin warp-oss --target "$TARGET" --features "$FEATURES"
+          cd ..
+
+          # Set variables
+          BUNDLE_DIR="target/$TARGET/release-lto/bundle/osx"
+          APP_NAME="WarpOss"
+          APP_PATH="$BUNDLE_DIR/$APP_NAME.app"
+
+          # Add rpath for frameworks
+          install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_PATH/Contents/MacOS/warp-oss"
+
+          # Update plist
+          export WARP_SCHEME_NAME="warposs"
+          export WARP_PLIST_PATH="$APP_PATH/Contents/Info.plist"
+          ./script/update_plist
+
+          # Add NSDockTilePlugIn entry
+          plutil -insert NSDockTilePlugIn -string "WarpDockTilePlugin.docktileplugin" "$APP_PATH/Contents/Info.plist" || true
+
+          # Add SMAuthorizedClients
+          plutil -insert SMAuthorizedClients -xml "<array><string>dev.warp.WarpOss</string></array>" "$APP_PATH/Contents/Info.plist" || true
+
+          # Add LSBackgroundOnly
+          plutil -insert LSBackgroundOnly -bool false "$APP_PATH/Contents/Info.plist" || true
+
+          # Prepare resources
+          BUNDLED_RESOURCES_DIR="$APP_PATH/Contents/Resources"
+          ./script/prepare_bundled_resources "$BUNDLED_RESOURCES_DIR" "oss" "release-lto"
+
+          # Compile icon
+          ./script/compile_icon "oss" "$APP_PATH"
+
+          # Create CLI wrapper
+          mkdir -p "$BUNDLED_RESOURCES_DIR/bin"
+          cat > "$BUNDLED_RESOURCES_DIR/bin/warp-oss" << 'SCRIPT'
+          #!/bin/bash
+          script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+          exec -a "$0" "$script_dir/../../MacOS/warp-oss" "$@"
+          SCRIPT
+          chmod +x "$BUNDLED_RESOURCES_DIR/bin/warp-oss"
+
+          # Create DMG
+          DMG_DIR="$BUNDLE_DIR/dmg/warp-oss"
+          mkdir -p "$DMG_DIR"
+          cp -R "$APP_PATH" "$DMG_DIR/"
+
+          DMG_NAME="WarpOss-${{ inputs.arch }}.dmg"
+          DMG_PATH="$BUNDLE_DIR/$DMG_NAME"
+
+          create-dmg \
+            --volname Warp \
+            --no-internet-enable \
+            --icon-size 128 \
+            --window-size 700 500 \
+            --format UDZO \
+            --app-drop-link 550 250 \
+            --icon "$APP_NAME.app" 150 250 \
+            --filesystem APFS \
+            "$DMG_PATH" \
+            "$DMG_DIR"
+
+          echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=$DMG_NAME" >> "$GITHUB_OUTPUT"
+          echo "DMG created at: $DMG_PATH"
+          ls -la "$DMG_PATH"
+
+      - name: Upload DMG to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          files: ${{ steps.bundle.outputs.dmg_path }}
+          token: ${{ secrets.GITHUB_TOKEN }}
