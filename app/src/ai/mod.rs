@@ -28,6 +28,8 @@ pub mod harness_availability;
 pub(crate) mod harness_display;
 pub(crate) mod llms;
 pub mod onboarding;
+pub(crate) mod openai_client;
+pub(crate) mod model_fetcher;
 pub(crate) mod persisted_workspace;
 pub(crate) mod predict;
 pub mod request_usage_model;

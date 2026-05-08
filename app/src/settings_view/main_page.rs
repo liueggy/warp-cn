@@ -90,7 +90,7 @@ fn maybe_add_settings_sync_toggle_binding<T: Action + Clone>(
         *lock = true;
         toggle_binding_pairs.push(
             ToggleSettingActionPair::new(
-                "settings sync",
+                "设置同步",
                 builder(SettingsAction::MainPageToggle(
                     MainPageAction::ToggleSettingsSync,
                 )),
@@ -287,7 +287,7 @@ impl MainSettingsPageView {
 
         widgets.push(Box::new(LogoutWidget::default()));
 
-        let page = PageType::new_uncategorized(widgets, Some("Account"));
+        let page = PageType::new_uncategorized(widgets, Some("账户"));
 
         MainSettingsPageView { page, auth_state }
     }
@@ -566,7 +566,7 @@ impl AccountWidget {
                 }
             }
         } else {
-            let plan_badge_child = render_customer_type_badge(appearance, "Free".into());
+            let plan_badge_child = render_customer_type_badge(appearance, "免费版".into());
             plan_info.add_child(plan_badge_child);
 
             plan_info.add_child(
@@ -608,7 +608,7 @@ impl SettingsWidget for AccountWidget {
     type View = MainSettingsPageView;
 
     fn search_terms(&self) -> &str {
-        "account sign up"
+        "注册 账户"
     }
 
     fn render(
@@ -676,7 +676,7 @@ impl SettingsWidget for SettingsSyncWidget {
     type View = MainSettingsPageView;
 
     fn search_terms(&self) -> &str {
-        "settings sync"
+        "设置同步"
     }
 
     fn should_render(&self, app: &AppContext) -> bool {
@@ -765,7 +765,7 @@ impl SettingsWidget for EarnRewardsWidget {
     type View = MainSettingsPageView;
 
     fn search_terms(&self) -> &str {
-        "earn rewards referral share friends"
+        "赚取奖励 推荐 分享 好友"
     }
 
     fn should_render(&self, app: &AppContext) -> bool {
@@ -1018,7 +1018,7 @@ impl SettingsWidget for VersionInfoWidget {
     type View = MainSettingsPageView;
 
     fn search_terms(&self) -> &str {
-        "version update"
+        "版本 更新"
     }
 
     fn render(
@@ -1066,7 +1066,7 @@ impl SettingsWidget for LogoutWidget {
     type View = MainSettingsPageView;
 
     fn search_terms(&self) -> &str {
-        "sign out log out logout"
+        "退出登录 注销"
     }
 
     fn should_render(&self, app: &AppContext) -> bool {

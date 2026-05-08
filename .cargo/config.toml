@@ -1,4 +1,8 @@
 [env]
+# warp-cn: Windows 构建时，部分系统 protoc 只带 protoc.exe，不带 google/protobuf/*.proto。
+# 给 prost/tonic/protoc build scripts 指向项目内的最小 well-known proto include 目录。
+PROTOC_INCLUDE = { value = "vendor/protobuf/include", relative = true }
+
 # This is used to set the minimum deployment target for mac
 # https://cmake.org/cmake/help/latest/envvar/MACOSX_DEPLOYMENT_TARGET.html
 # If unset, it uses the system one, but we want to build for older versions
@@ -9,7 +13,8 @@
 MACOSX_DEPLOYMENT_TARGET = "10.14"
 
 [build]
-rustflags = ["-C", "symbol-mangling-version=v0", "-C", "link-args=-Wl,-headerpad_max_install_names"]
+# warp-cn: removed macOS-only link-args=-Wl,-headerpad_max_install_names (crashes MSVC on Windows)
+rustflags = ["-C", "symbol-mangling-version=v0"]
 
 [net]
 git-fetch-with-cli = true

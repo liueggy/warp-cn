@@ -137,6 +137,7 @@ impl Requests {
         };
 
         if cached_request_limit_info.is_none()
+            && !cfg!(feature = "skip_login") // warp-cn: 跳过 Warp 服务器查询
             && AuthStateProvider::as_ref(ctx).get().is_logged_in()
         {
             let ai_client = requests.ai_client.clone();

@@ -9600,9 +9600,8 @@ impl TerminalView {
     ) {
         match action {
             AnonymousUserLoginBannerAction::SignUp => {
-                ctx.emit(Event::SignupAnonymousUser {
-                    entrypoint: AnonymousUserSignupEntrypoint::LoginGatedFeature,
-                });
+                // warp-cn: 导航到 AI 设置页面，用户可配置胜算云 API Key
+                ctx.emit(Event::OpenSettings(SettingsSection::WarpAgent));
                 self.remove_anonymous_user_ai_sign_up_banner(ctx);
             }
             AnonymousUserLoginBannerAction::Close => {

@@ -130,6 +130,11 @@ pub struct RequestParams {
     pub parent_agent_id: Option<String>,
     /// The display name for this agent (e.g. "Agent 1"), assigned by the orchestrator.
     pub agent_name: Option<String>,
+    /// SSYCloud API key — when set, AI requests route to SSYCloud/custom endpoint
+    /// instead of Warp's official server.
+    pub ssy_cloud_api_key: Option<String>,
+    /// Custom OpenAI-compatible endpoint URL.
+    pub custom_ai_endpoint: Option<String>,
 }
 
 pub type Event = Result<warp_multi_agent_api::ResponseEvent, Arc<AIApiError>>;
@@ -332,6 +337,16 @@ impl RequestParams {
             supported_tools_override: request_input.supported_tools_override.clone(),
             parent_agent_id: None,
             agent_name: None,
+            ssy_cloud_api_key: ApiKeyManager::as_ref(app)
+                .keys()
+                .effective_openai_key()
+                .map(ToOwned::to_owned),
+            custom_ai_endpoint: Some(
+                ApiKeyManager::as_ref(app)
+                    .keys()
+                    .effective_endpoint()
+                    .to_owned(),
+            ),
         }
     }
 }

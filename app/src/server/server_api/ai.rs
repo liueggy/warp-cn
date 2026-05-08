@@ -1321,6 +1321,15 @@ impl AIClient for ServerApi {
 
     #[cfg(not(feature = "agent_mode_evals"))]
     async fn get_request_limit_info(&self) -> Result<RequestUsageInfo, anyhow::Error> {
+        // warp-cn: skip_login 模式下不查询 Warp 服务器，直接返回默认值避免日志刷屏
+        #[cfg(feature = "skip_login")]
+        {
+            return Ok(RequestUsageInfo {
+                request_limit_info: crate::ai::request_usage_model::RequestLimitInfo::new_for_evals(),
+                bonus_grants: vec![],
+            });
+        }
+        #[allow(unreachable_code)]
         let variables = GetRequestLimitInfoVariables {
             request_context: get_request_context(),
         };

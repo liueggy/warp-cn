@@ -131,6 +131,16 @@ impl PromptAlertView {
     }
 
     pub fn determine_state(app: &AppContext) -> PromptAlertState {
+        // warp-cn: skip_login 模式下，只要用户配置了 API Key 就允许使用 AI
+        if cfg!(feature = "skip_login") {
+            let has_api_key = ApiKeyManager::as_ref(app).keys().has_any_key();
+            if has_api_key || AIRequestUsageModel::as_ref(app).has_any_ai_remaining(app) {
+                return PromptAlertState::NoAlert;
+            }
+            // 未配置 API Key，提示用户去设置
+            return PromptAlertState::RequestLimitReached;
+        }
+
         // First, if the user is offline, no AI features will work.
         if !NetworkStatus::as_ref(app).is_online() {
             return PromptAlertState::NoConnection;

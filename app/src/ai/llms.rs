@@ -1,5 +1,6 @@
 use parking_lot::FairMutex;
 use serde::{de, Deserialize, Serialize};
+use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
     sync::{Arc, OnceLock},
@@ -18,6 +19,7 @@ use crate::{
     server::server_api::ServerApiProvider,
     workspaces::user_workspaces::{UserWorkspaces, UserWorkspacesEvent},
 };
+use anyhow::Context as _;
 
 use ai::api_keys::{ApiKeyManager, ApiKeyManagerEvent};
 
@@ -563,7 +565,7 @@ impl LLMPreferences {
                 new_status: NetworkStatusKind::Online,
             } = event
             {
-                me.refresh_authed_models(ctx);
+                me.refresh_available_models(ctx);
             }
         });
 
@@ -599,6 +601,10 @@ impl LLMPreferences {
             last_update: None,
             base_llm_for_terminal_view,
         };
+
+        // warp-cn: skip_login 模式没有 Warp 官方登录流程，启动后也需要直接刷新胜算云模型列表。
+        #[cfg(feature = "skip_login")]
+        me.refresh_available_models(ctx);
 
         // In agent mode eval builds, eagerly kick off a fetch of the model list from the server
         // so that it's available by the time test steps like `set_preferred_agent_mode_llm` run.
@@ -927,6 +933,24 @@ impl LLMPreferences {
         );
     }
 
+    /// warp-cn: fetch public SSYCloud model metadata and expose it through Warp's normal model selector.
+    #[cfg(feature = "skip_login")]
+    fn refresh_ssy_cloud_models(&self, ctx: &mut ModelContext<Self>) {
+        ctx.spawn(
+            async move { fetch_ssy_cloud_models().await },
+            |me, result, ctx| match result {
+                Ok(update) => {
+                    if update != me.models_by_feature {
+                        me.on_server_update(update, ctx);
+                    }
+                }
+                Err(e) => {
+                    report_error!(e.context("Failed to fetch SSYCloud LLMs"));
+                }
+            },
+        );
+    }
+
     /// No auth required (i.e. to populate the pre-login onboarding picker).
     fn refresh_public_models(&self, ctx: &mut ModelContext<Self>) {
         let ai_api_client = ServerApiProvider::as_ref(ctx).get_ai_client();
@@ -946,6 +970,12 @@ impl LLMPreferences {
     }
 
     pub fn refresh_available_models(&self, ctx: &mut ModelContext<Self>) {
+        #[cfg(feature = "skip_login")]
+        {
+            self.refresh_ssy_cloud_models(ctx);
+            return;
+        }
+
         if AuthStateProvider::as_ref(ctx).get().is_logged_in() {
             self.refresh_authed_models(ctx);
         } else {
@@ -1114,6 +1144,171 @@ impl Entity for LLMPreferences {
 }
 
 impl SingletonEntity for LLMPreferences {}
+
+#[cfg(feature = "skip_login")]
+#[derive(Debug, Deserialize)]
+struct SsyCloudModelsResponse {
+    data: Vec<SsyCloudModel>,
+}
+
+#[cfg(feature = "skip_login")]
+#[derive(Debug, Deserialize)]
+struct SsyCloudModel {
+    #[serde(default)]
+    id: String,
+    #[serde(default)]
+    api_name: String,
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    company: String,
+    #[serde(default)]
+    description: Option<String>,
+    #[serde(default)]
+    context_window: u32,
+    #[serde(default)]
+    max_tokens: u32,
+    #[serde(default)]
+    support_apis: Option<Vec<String>>,
+    #[serde(default)]
+    architecture: Option<Value>,
+}
+
+#[cfg(feature = "skip_login")]
+async fn fetch_ssy_cloud_models() -> anyhow::Result<ModelsByFeature> {
+    const SSY_MODELS_URL: &str = "https://router.shengsuanyun.com/api/v1/models";
+
+    let response: SsyCloudModelsResponse = reqwest::Client::new()
+        .get(SSY_MODELS_URL)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    let mut choices = response
+        .data
+        .into_iter()
+        .filter(|model| {
+            model
+                .support_apis
+                .as_ref()
+                .map_or(false, |apis| apis.iter().any(|api| api == "/v1/chat/completions"))
+        })
+        .map(LLMInfo::from)
+        .collect::<Vec<_>>();
+
+    choices.sort_by(|a, b| a.display_name.cmp(&b.display_name));
+
+    if choices.is_empty() {
+        anyhow::bail!("SSYCloud returned no /v1/chat/completions-compatible models");
+    }
+
+    let preferred_default = choices
+        .iter()
+        .find(|model| model.id.as_str() == "anthropic/claude-sonnet-4.5")
+        .or_else(|| choices.iter().find(|model| model.id.as_str().contains("claude")))
+        .or_else(|| choices.iter().find(|model| model.id.as_str().contains("gpt")))
+        .unwrap_or(&choices[0])
+        .id
+        .clone();
+
+    let agent_mode = AvailableLLMs::new(preferred_default.clone(), choices.clone(), None)?;
+    let coding = AvailableLLMs::new(preferred_default.clone(), choices.clone(), None)?;
+    let cli_agent = Some(AvailableLLMs::new(preferred_default.clone(), choices.clone(), None)?);
+    let computer_use = Some(AvailableLLMs::new(preferred_default, choices, None)?);
+
+    Ok(ModelsByFeature {
+        agent_mode,
+        coding,
+        cli_agent,
+        computer_use,
+    })
+}
+
+#[cfg(feature = "skip_login")]
+impl From<SsyCloudModel> for LLMInfo {
+    fn from(model: SsyCloudModel) -> Self {
+        let id = if model.api_name.is_empty() {
+            model.id
+        } else {
+            model.api_name
+        };
+        let company = model.company.trim();
+        let name = if model.name.is_empty() {
+            id.clone()
+        } else if company.is_empty() || model.name.starts_with(company) {
+            model.name
+        } else {
+            format!("{} {}", company, model.name)
+        };
+        let description = model.description.map(|desc| {
+            let first_line = desc.lines().next().unwrap_or_default().trim();
+            let truncated = first_line.chars().take(80).collect::<String>();
+            if truncated.is_empty() {
+                "胜算云模型".to_owned()
+            } else {
+                truncated
+            }
+        });
+        let output_is_text = model
+            .architecture
+            .as_ref()
+            .and_then(|arch| arch.get("output"))
+            .and_then(|v| v.as_str())
+            .is_none_or(|output| output.is_empty() || output.contains("text"));
+        let input = model
+            .architecture
+            .as_ref()
+            .and_then(|arch| arch.get("input"))
+            .and_then(|v| v.as_str())
+            .unwrap_or_default();
+
+        Self {
+            display_name: name.clone(),
+            base_model_name: name,
+            id: LLMId::from(id),
+            reasoning_level: None,
+            usage_metadata: LLMUsageMetadata {
+                request_multiplier: 1,
+                credit_multiplier: None,
+            },
+            description,
+            disable_reason: if output_is_text {
+                None
+            } else {
+                Some(DisableReason::Unavailable)
+            },
+            vision_supported: input.contains("image"),
+            spec: None,
+            provider: provider_from_company(company),
+            host_configs: HashMap::new(),
+            discount_percentage: None,
+            context_window: LLMContextWindow {
+                is_configurable: false,
+                min: 0,
+                max: model.context_window,
+                default_max: model.context_window,
+            },
+        }
+    }
+}
+
+#[cfg(feature = "skip_login")]
+fn provider_from_company(company: &str) -> LLMProvider {
+    let normalized = company.to_ascii_lowercase();
+    if normalized.contains("openai") {
+        LLMProvider::OpenAI
+    } else if normalized.contains("anthropic") {
+        LLMProvider::Anthropic
+    } else if normalized.contains("google") || normalized.contains("gemini") {
+        LLMProvider::Google
+    } else if normalized.contains("xai") || normalized.contains("grok") {
+        LLMProvider::Xai
+    } else {
+        LLMProvider::Unknown
+    }
+}
 
 fn get_new_agent_mode_choices(
     old_config: &AvailableLLMs,

@@ -1171,6 +1171,8 @@ impl SettingsView {
         });
 
         let mut settings_pages = vec![
+            // warp-cn: skip_login 模式下隐藏账户页面
+            #[cfg(not(feature = "skip_login"))]
             SettingsPage::new(main_page_handle),
             SettingsPage::new(ai_page_handle),
             SettingsPage::new(billing_and_usage_page_handle),
@@ -1196,11 +1198,14 @@ impl SettingsView {
         // Build sidebar nav items. AI page is presented as an "AI 助手" umbrella
         // with subpages; the actual AI SettingsPage is hidden from direct sidebar listing.
         let mut nav_items = vec![
+            // warp-cn: skip_login 模式下隐藏账户导航项
+            #[cfg(not(feature = "skip_login"))]
             SettingsNavItem::Page(SettingsSection::Account),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
                 "AI 助手",
                 SettingsSection::ai_subpages().to_vec(),
             )),
+            #[cfg(not(feature = "skip_login"))]
             SettingsNavItem::Page(SettingsSection::BillingAndUsage),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
                 "代码",
@@ -1216,11 +1221,13 @@ impl SettingsView {
                     SettingsSection::OzCloudAPIKeys,
                 ],
             )),
+            #[cfg(not(feature = "skip_login"))]
             SettingsNavItem::Page(SettingsSection::Teams),
             SettingsNavItem::Page(SettingsSection::Appearance),
             SettingsNavItem::Page(SettingsSection::Features),
             SettingsNavItem::Page(SettingsSection::Keybindings),
             SettingsNavItem::Page(SettingsSection::Warpify),
+            #[cfg(not(feature = "skip_login"))]
             SettingsNavItem::Page(SettingsSection::Referrals),
             SettingsNavItem::Page(SettingsSection::SharedBlocks),
             SettingsNavItem::Page(SettingsSection::WarpDrive),

@@ -3214,6 +3214,22 @@ impl Workspace {
         // pushed by `subscribe_to_settings_errors` and `dismiss_workspace_banner`.
         ws.sync_settings_error_state_into_settings_pane(ctx);
 
+        // warp-cn: skip_login 首启未配置 API Key 时，自动打开 Warp Agent 设置页引导用户
+        #[cfg(feature = "skip_login")]
+        {
+            let has_key = ai::api_keys::ApiKeyManager::as_ref(ctx)
+                .keys()
+                .effective_openai_key()
+                .map(|k| !k.trim().is_empty())
+                .unwrap_or(false);
+            if !has_key {
+                ws.show_settings_with_section(
+                    Some(SettingsSection::WarpAgent),
+                    ctx,
+                );
+            }
+        }
+
         let weak_handle = ctx.handle();
         WorkspaceRegistry::handle(ctx).update(ctx, |registry, _| {
             registry.register(window_id, weak_handle);
@@ -7215,7 +7231,12 @@ impl Workspace {
             is_focused: true,
             custom_vertical_tabs_title: None,
             contents: LeafContents::Settings(SettingsPaneSnapshot::Local {
-                current_page: page.unwrap_or_default(),
+                // warp-cn: skip_login 下默认打开 WarpAgent 而非 Account
+                current_page: page.unwrap_or(if cfg!(feature = "skip_login") {
+                    SettingsSection::WarpAgent
+                } else {
+                    SettingsSection::Account
+                }),
                 search_query: search_query.map(|s| s.to_owned()),
             }),
         })));
@@ -8385,6 +8406,7 @@ impl Workspace {
         ]);
 
         if self.auth_state.is_anonymous_or_logged_out() {
+            #[cfg(not(feature = "skip_login"))]
             items.push(
                 MenuItemFields::new("Sign up")
                     .with_on_select_action(WorkspaceAction::SignupAnonymousUser)
@@ -8392,40 +8414,44 @@ impl Workspace {
             );
         }
 
-        // Check if the user is on any paid plan to determine whether to show "Billing and Usage" or "Upgrade"
-        let is_on_paid_plan = UserWorkspaces::as_ref(app)
-            .current_workspace()
-            .map(|workspace| workspace.billing_metadata.is_user_on_paid_plan())
-            .unwrap_or(false);
+        // warp-cn: skip_login 下隐藏所有账户/账单/推荐/登出菜单
+        #[cfg(not(feature = "skip_login"))]
+        {
+            // Check if the user is on any paid plan to determine whether to show "Billing and Usage" or "Upgrade"
+            let is_on_paid_plan = UserWorkspaces::as_ref(app)
+                .current_workspace()
+                .map(|workspace| workspace.billing_metadata.is_user_on_paid_plan())
+                .unwrap_or(false);
 
-        if is_on_paid_plan {
+            if is_on_paid_plan {
+                items.push(
+                    MenuItemFields::new("Billing and usage")
+                        .with_on_select_action(WorkspaceAction::ShowSettingsPage(
+                            SettingsSection::BillingAndUsage,
+                        ))
+                        .into_item(),
+                );
+            } else {
+                items.push(
+                    MenuItemFields::new("Upgrade")
+                        .with_on_select_action(WorkspaceAction::ShowUpgrade)
+                        .into_item(),
+                );
+            }
+
             items.push(
-                MenuItemFields::new("Billing and usage")
-                    .with_on_select_action(WorkspaceAction::ShowSettingsPage(
-                        SettingsSection::BillingAndUsage,
-                    ))
+                MenuItemFields::new("Invite a friend")
+                    .with_on_select_action(WorkspaceAction::ShowReferralSettingsPage)
                     .into_item(),
             );
-        } else {
-            items.push(
-                MenuItemFields::new("Upgrade")
-                    .with_on_select_action(WorkspaceAction::ShowUpgrade)
-                    .into_item(),
-            );
-        }
 
-        items.push(
-            MenuItemFields::new("Invite a friend")
-                .with_on_select_action(WorkspaceAction::ShowReferralSettingsPage)
-                .into_item(),
-        );
-
-        if !self.auth_state.is_anonymous_or_logged_out() {
-            items.push(
-                MenuItemFields::new("Log out")
-                    .with_on_select_action(WorkspaceAction::LogOut)
-                    .into_item(),
-            );
+            if !self.auth_state.is_anonymous_or_logged_out() {
+                items.push(
+                    MenuItemFields::new("Log out")
+                        .with_on_select_action(WorkspaceAction::LogOut)
+                        .into_item(),
+                );
+            }
         }
         items
     }

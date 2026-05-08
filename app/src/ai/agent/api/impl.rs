@@ -136,6 +136,55 @@ pub async fn generate_multi_agent_output(
         mcp_context: params.mcp_context.map(Into::into),
     };
 
+    // ── SSYCloud / 自定义 OpenAI 端点路由 ───────────────────────────────
+    // 如果配置了胜算云 API key，则直接走 OpenAI 兼容接口，不经过 Warp 服务器。
+    if let Some(ssy_key) = params.ssy_cloud_api_key.clone() {
+        let user_message = crate::ai::openai_client::extract_user_message(&request)
+            .unwrap_or_else(|| "（用户输入了空消息）".to_string());
+        let model = request
+            .settings
+            .as_ref()
+            .and_then(|s| s.model_config.as_ref())
+            .map(|mc| mc.base.as_str())
+            .filter(|model| !model.trim().is_empty() && !model.contains("auto"))
+            .unwrap_or("anthropic/claude-sonnet-4.5");
+        let endpoint = params
+            .custom_ai_endpoint
+            .clone()
+            .unwrap_or_else(|| "https://router.shengsuanyun.com/api/v1".to_string());
+        let conversation_id = request
+            .metadata
+            .as_ref()
+            .and_then(|m| {
+                let id = &m.conversation_id;
+                if id.is_empty() { None } else { Some(id.as_str()) }
+            });
+
+        let openai_stream = crate::ai::openai_client::stream_chat_completion(
+            &user_message,
+            model,
+            &ssy_key,
+            &endpoint,
+            conversation_id,
+        )
+        .await;
+
+        match openai_stream {
+            Ok(stream) => {
+                let boxed: ResponseStream = Box::pin(stream);
+                return Ok(boxed);
+            }
+            Err(e) => {
+                // On error, log and fall through to offer a config prompt
+                log::error!("SSYCloud API error: {e:#}");
+                // Return the error in the stream so the UI shows a helpful message
+                let (tx, rx) = async_channel::unbounded();
+                let _ = tx.send(Err(e)).await;
+                return Ok(Box::pin(rx));
+            }
+        }
+    }
+
     let response_stream = server_api.generate_multi_agent_output(&request).await;
     match response_stream {
         Ok(stream) => {

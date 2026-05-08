@@ -991,7 +991,9 @@ impl AIAssistantPanelView {
             .finish(),
         );
 
-        let is_custom_llm_enabled: bool = UserWorkspaces::as_ref(app)
+        // warp-cn: skip_login 模式下始终视为自定义 LLM 已启用
+        let is_custom_llm_enabled: bool = cfg!(feature = "skip_login")
+            || UserWorkspaces::as_ref(app)
             .current_team()
             .is_some_and(|team| team.is_custom_llm_enabled());
 

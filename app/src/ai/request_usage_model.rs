@@ -128,7 +128,7 @@ pub struct RequestUsageInfo {
     pub bonus_grants: Vec<BonusGrant>,
 }
 
-#[cfg(feature = "agent_mode_evals")]
+#[cfg(any(feature = "agent_mode_evals", feature = "skip_login"))]
 impl RequestLimitInfo {
     pub fn new_for_evals() -> Self {
         Self {
@@ -224,6 +224,10 @@ impl AIRequestUsageModel {
 
     /// Spawns a task to refresh the latest AI request usage and bonus grants, fetching from the server.
     pub fn refresh_request_usage_async(&mut self, ctx: &mut ModelContext<Self>) {
+        // warp-cn: skip_login 模式下无需查询 Warp 服务器
+        if cfg!(feature = "skip_login") {
+            return;
+        }
         if !AuthStateProvider::as_ref(ctx).get().is_logged_in() {
             return;
         }
@@ -399,8 +403,13 @@ impl AIRequestUsageModel {
 
         // If you have provided your own API key,
         // it doesn't matter if you are out of warp-provided requests.
+        // warp-cn: skip_login 模式下 is_byo_api_key_enabled 始终为 true
         let has_byo_api_key = UserWorkspaces::as_ref(ctx).is_byo_api_key_enabled()
             && ApiKeyManager::as_ref(ctx).keys().has_any_key();
+
+        // warp-cn: skip_login 模式下有 API Key 即可使用
+        #[cfg(feature = "skip_login")]
+        let has_base_plan_ai_requests = has_byo_api_key || has_base_plan_ai_requests;
 
         has_base_plan_ai_requests
             || (user_bonus_credits || workspace_bonus_credits)

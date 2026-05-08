@@ -17,10 +17,10 @@ use super::{
     INLINE_BANNER_MARGIN_BETWEEN_BUTTONS, INLINE_BANNER_RIGHT_MARGIN,
 };
 
-const TITLE: &str = "Login for AI";
+const TITLE: &str = "AI 功能未配置";
 const CONTENT: &str =
-    "AI features are unavailable for logged-out users. Create an account to use AI.";
-const SIGN_UP_BUTTON_TEXT: &str = "Sign Up";
+    "请先在设置中配置胜算云 API 密钥以使用 AI 功能。";
+const SIGN_UP_BUTTON_TEXT: &str = "去配置";
 
 // Layout constants for three-column banner
 const ICON_SIZE_OFFSET: f32 = 3.0;

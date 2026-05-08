@@ -1091,6 +1091,11 @@ impl View for LoginSlideView {
     }
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
+        // skip_login 模式下不渲染登录界面
+        if cfg!(feature = "skip_login") {
+            return Flex::row().finish();
+        }
+
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
 
