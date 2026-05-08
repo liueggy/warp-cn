@@ -55,6 +55,9 @@ jobs:
             cp cargo-bundle "$cargo_location"
           fi
 
+      - name: Install cargo-about
+        run: cargo install --locked cargo-about@0.8.4
+
       - name: Install create-dmg
         run: brew install create-dmg
 
