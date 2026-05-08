@@ -1,0 +1,39 @@
+// Minimal vendored descriptor definitions for Warp Windows builds when protoc's
+// standard include directory is unavailable. This file provides the option
+// extension targets used by warp-proto-apis/options.proto.
+
+syntax = "proto2";
+
+package google.protobuf;
+
+message FileOptions {
+  extensions 1000 to max;
+}
+
+message MessageOptions {
+  extensions 1000 to max;
+}
+
+message FieldOptions {
+  extensions 1000 to max;
+}
+
+message OneofOptions {
+  extensions 1000 to max;
+}
+
+message EnumOptions {
+  extensions 1000 to max;
+}
+
+message EnumValueOptions {
+  extensions 1000 to max;
+}
+
+message ServiceOptions {
+  extensions 1000 to max;
+}
+
+message MethodOptions {
+  extensions 1000 to max;
+}
