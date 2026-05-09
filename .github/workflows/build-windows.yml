@@ -70,7 +70,7 @@ jobs:
 
       - name: Build installer
         run: |
-          $TARGET_DIR = "target\x86_64-pc-windows-msvc\rlto"
+          $TARGET_DIR = "$(Get-Location)\target\x86_64-pc-windows-msvc\rlto"
           $INSTALLER_DIR = "script\windows"
           $OUTPUT_DIR = "$INSTALLER_DIR\Output"
           if (-Not (Test-Path $OUTPUT_DIR)) { New-Item -ItemType Directory -Path $OUTPUT_DIR -Force }
