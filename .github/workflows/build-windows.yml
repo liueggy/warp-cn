@@ -59,6 +59,7 @@ jobs:
       - name: Prepare bundled resources
         env:
           GIT_RELEASE_TAG: ${{ inputs.release_tag }}
+          CARGO_FULL_PROFILE: rlto
         run: |
           $TARGET_DIR = "target\x86_64-pc-windows-msvc\rlto"
           $RESOURCES_DIR = "$TARGET_DIR\resources"
