@@ -51,6 +51,9 @@ jobs:
       - name: Build warp-oss
         env:
           GIT_RELEASE_TAG: ${{ inputs.release_tag }}
+          # Override PROTOC_INCLUDE to use system protoc includes
+          # Our vendor dir is minimal (for local dev) and incompatible with protoc 28+
+          PROTOC_INCLUDE: "C:\\Program Files\\protoc\\include"
         run: |
           $FEATURES = "release_bundle,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
           cargo build -p warp --profile rlto --bin warp-oss --features $FEATURES --target x86_64-pc-windows-msvc
