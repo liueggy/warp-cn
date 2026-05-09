@@ -87,9 +87,6 @@ jobs:
 
           export MACOSX_DEPLOYMENT_TARGET="10.14"
           export GIT_RELEASE_TAG="${{ inputs.release_tag }}"
-          # Override PROTOC_INCLUDE to use system protoc includes (brew-installed protobuf)
-          # Our vendor dir is minimal (for Windows) and incompatible with protoc 34+
-          export PROTOC_INCLUDE="$(brew --prefix protobuf)/include"
 
           # Build the binary
           cd app

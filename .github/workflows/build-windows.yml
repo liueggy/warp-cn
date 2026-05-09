@@ -51,9 +51,6 @@ jobs:
       - name: Build warp-oss
         env:
           GIT_RELEASE_TAG: ${{ inputs.release_tag }}
-          # Unset PROTOC_INCLUDE from .cargo/config.toml - let protoc use its built-in defaults
-          # The vendor dir only has 3 minimal .proto files needed for local dev, not CI
-          PROTOC_INCLUDE: ""
         run: |
           $FEATURES = "release_bundle,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
           cargo build -p warp --profile rlto --bin warp-oss --features $FEATURES --target x86_64-pc-windows-msvc
