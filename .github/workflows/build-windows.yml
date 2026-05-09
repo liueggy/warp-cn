@@ -51,14 +51,10 @@ jobs:
       - name: Build warp-oss
         env:
           GIT_RELEASE_TAG: ${{ inputs.release_tag }}
+          # Unset PROTOC_INCLUDE from .cargo/config.toml - let protoc use its built-in defaults
+          # The vendor dir only has 3 minimal .proto files needed for local dev, not CI
+          PROTOC_INCLUDE: ""
         run: |
-          # Find the actual protoc include path from choco install
-          $PROTOC_PATH = (Get-Command protoc).Source
-          $PROTOC_DIR = Split-Path $PROTOC_PATH
-          $PROTOC_INCLUDE_DIR = Join-Path (Split-Path $PROTOC_DIR) "include"
-          Write-Output "Using PROTOC_INCLUDE=$PROTOC_INCLUDE_DIR"
-          $env:PROTOC_INCLUDE = $PROTOC_INCLUDE_DIR
-
           $FEATURES = "release_bundle,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
           cargo build -p warp --profile rlto --bin warp-oss --features $FEATURES --target x86_64-pc-windows-msvc
 
