@@ -85,20 +85,7 @@ impl OneTimeModalModel {
                 });
 
                 // warp-cn: For skip_login builds (new users), show the welcome API modal.
-                if !*GeneralSettings::as_ref(ctx)
-                    .did_check_to_trigger_welcome_api_modal
-                    .value()
-                {
-                    GeneralSettings::handle(ctx).update(ctx, |settings, ctx| {
-                        if let Err(e) = settings
-                            .did_check_to_trigger_welcome_api_modal
-                            .set_value(true, ctx)
-                        {
-                            log::warn!("Failed to mark welcome API modal as dismissed: {e}");
-                        }
-                    });
-                    me.set_welcome_api_modal_open(true, ctx);
-                }
+                me.check_and_trigger_welcome_api_modal(ctx);
             }
         });
 
@@ -248,6 +235,11 @@ impl OneTimeModalModel {
             return;
         }
 
+        // warp-cn: Show welcome API modal for existing/onboarded users too.
+        if self.check_and_trigger_welcome_api_modal(ctx) {
+            return;
+        }
+
         self.check_and_trigger_build_plan_migration_modal(ctx);
     }
 
@@ -335,6 +327,30 @@ impl OneTimeModalModel {
         let should_show_openwarp_modal = !matches!(ChannelState::channel(), Channel::Integration);
         self.set_openwarp_launch_modal_open(should_show_openwarp_modal, ctx);
         should_show_openwarp_modal
+    }
+
+    fn check_and_trigger_welcome_api_modal(&mut self, ctx: &mut ModelContext<Self>) -> bool {
+        let general_settings = GeneralSettings::as_ref(ctx);
+        let welcome_modal_shown = *general_settings
+            .did_check_to_trigger_welcome_api_modal
+            .value();
+
+        if welcome_modal_shown {
+            return false;
+        }
+
+        GeneralSettings::handle(ctx).update(ctx, |settings, ctx| {
+            if let Err(e) = settings
+                .did_check_to_trigger_welcome_api_modal
+                .set_value(true, ctx)
+            {
+                log::warn!("Failed to mark welcome API modal as dismissed: {e}");
+            }
+        });
+
+        let should_show = !matches!(ChannelState::channel(), Channel::Integration);
+        self.set_welcome_api_modal_open(should_show, ctx);
+        should_show
     }
 
     pub fn is_build_plan_migration_modal_open(&self) -> bool {

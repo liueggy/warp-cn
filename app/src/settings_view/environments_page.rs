@@ -81,8 +81,8 @@ use {
     warp_graphql::queries::user_github_info::UserGithubInfoResult,
 };
 
-const PAGE_TITLE_TEXT: &str = "Environments";
-const PAGE_DESCRIPTION_TEXT: &str = "Environments define where your ambient agents run. Set one up in minutes via GitHub (recommended), Warp-assisted setup, or manual configuration.";
+const PAGE_TITLE_TEXT: &str = "环境（Environments）";
+const PAGE_DESCRIPTION_TEXT: &str = "环境定义您的环境智能体运行的位置。通过 GitHub（推荐）、Warp 辅助设置或手动配置，几分钟内即可设置完成。";
 const CARD_BORDER_WIDTH: f32 = 1.;
 const CARD_PADDING: f32 = 16.;
 const CARD_SPACING: f32 = 12.;

@@ -82,15 +82,15 @@ const LSP_STATUS_INDICATOR_SIZE: f32 = 8.;
 const CODE_FEATURE_NAME: &str = "代码";
 const INITIALIZATION_SETTINGS_HEADER: &str = "初始化设置";
 const CODEBASE_INDEXING_LABEL: &str = "代码库索引";
-const CODEBASE_INDEX_DESCRIPTION: &str = "Warp can automatically index code repositories as you navigate them, helping agents quickly understand context and provide solutions. Code is never stored on the server. If a codebase is unable to be indexed, Warp can still navigate your codebase and gain insights via grep and find tool calling.";
-const WARP_INDEXING_IGNORE_DESCRIPTION: &str = "To exclude specific files or directories from indexing, add them to the .warpindexingignore file in your repository directory. These files will still be accessible to AI features, but they won't be included in codebase embeddings.";
+const CODEBASE_INDEX_DESCRIPTION: &str = "Warp 可以在您浏览代码仓库时自动建立索引，帮助智能体快速理解上下文并提供解决方案。代码不会存储在服务器上。如果代码库无法索引，Warp 仍可以通过 grep 和 find 工具调用来浏览代码库并获得洞察。";
+const WARP_INDEXING_IGNORE_DESCRIPTION: &str = "要从索引中排除特定文件或目录，请将它们添加到仓库目录中的 .warpindexingignore 文件中。这些文件仍可被 AI 功能访问，但不会包含在代码库嵌入中。";
 const AUTO_INDEX_FEATURE_NAME: &str = "默认索引新文件夹";
-const AUTO_INDEX_DESCRIPTION: &str = "When set to true, Warp will automatically index code repositories as you navigate them - helping agents quickly understand context and provide targeted solutions.";
-const INDEXING_DISABLED_ADMIN_TEXT: &str = "Team admins have disabled codebase indexing.";
-const INDEXING_WORKSPACE_ENABLED_ADMIN_TEXT: &str = "Team admins have enabled codebase indexing.";
+const AUTO_INDEX_DESCRIPTION: &str = "启用后，Warp 将在您浏览代码仓库时自动建立索引，帮助智能体快速理解上下文并提供针对性解决方案。";
+const INDEXING_DISABLED_ADMIN_TEXT: &str = "团队管理员已禁用代码库索引。";
+const INDEXING_WORKSPACE_ENABLED_ADMIN_TEXT: &str = "团队管理员已启用代码库索引。";
 const INDEXING_DISABLED_GLOBAL_AI_TEXT: &str =
-    "AI Features must be enabled to use codebase indexing.";
-const CODEBASE_INDEX_LIMIT_REACHED: &str = "You have reached the maximum number of codebase indices for your plan. Delete existing indices to auto-index new codebases.";
+    "必须启用 AI 功能才能使用代码库索引。";
+const CODEBASE_INDEX_LIMIT_REACHED: &str = "您已达到计划允许的最大代码库索引数量。请删除现有索引以自动索引新的代码库。";
 
 /// Identifies which subpage of the Code settings the user is viewing.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -112,8 +112,8 @@ impl CodeSubpage {
 
     pub fn title(&self) -> &'static str {
         match self {
-            Self::Indexing => "Codebase Indexing",
-            Self::EditorAndCodeReview => "Editor and Code Review",
+            Self::Indexing => "代码库索引（Codebase Indexing）",
+            Self::EditorAndCodeReview => "编辑器与代码审查（Editor and Code Review）",
         }
     }
 }
@@ -266,7 +266,7 @@ impl CodeSettingsPageView {
         });
 
         let manual_add_directory_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Index new folder", SecondaryTheme)
+            ActionButton::new("索引新文件夹", SecondaryTheme)
                 .with_icon(Icon::FindAll)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(CodeSettingsPageAction::ManualAddDirectory);
@@ -310,8 +310,8 @@ impl CodeSettingsPageView {
                 Box::new(GlobalSearchToggleWidget::default()),
             ]);
             let categories = vec![
-                Category::new("Codebase Indexing", codebase_indexing_widgets),
-                Category::new("Code Editor and Review", code_editor_review_widgets),
+                Category::new("代码库索引", codebase_indexing_widgets),
+                Category::new("代码编辑器与审查", code_editor_review_widgets),
             ];
             PageType::new_categorized(categories, None)
         } else {
@@ -353,7 +353,7 @@ impl CodeSettingsPageView {
             // or the full categorized page when subpage is None.
             if let Some(subpage) = subpage {
                 let manual_add_directory_button = ctx.add_typed_action_view(|_| {
-                    ActionButton::new("Index new folder", SecondaryTheme)
+                    ActionButton::new("索引新文件夹", SecondaryTheme)
                         .with_icon(Icon::FindAll)
                         .on_click(|ctx| {
                             ctx.dispatch_typed_action(CodeSettingsPageAction::ManualAddDirectory);
@@ -402,7 +402,7 @@ impl CodeSettingsPageView {
     fn build_full_page(ctx: &mut ViewContext<Self>) -> PageType<Self> {
         if FeatureFlag::OpenWarpNewSettingsModes.is_enabled() {
             let manual_add_directory_button = ctx.add_typed_action_view(|_| {
-                ActionButton::new("Index new folder", SecondaryTheme)
+                ActionButton::new("索引新文件夹", SecondaryTheme)
                     .with_icon(Icon::FindAll)
                     .on_click(|ctx| {
                         ctx.dispatch_typed_action(CodeSettingsPageAction::ManualAddDirectory);
@@ -434,13 +434,13 @@ impl CodeSettingsPageView {
                 Box::new(GlobalSearchToggleWidget::default()),
             ]);
             let categories = vec![
-                Category::new("Codebase Indexing", codebase_indexing_widgets),
-                Category::new("Code Editor and Review", code_editor_review_widgets),
+                Category::new("代码库索引", codebase_indexing_widgets),
+                Category::new("代码编辑器与审查", code_editor_review_widgets),
             ];
             PageType::new_categorized(categories, None)
         } else {
             let manual_add_directory_button = ctx.add_typed_action_view(|_| {
-                ActionButton::new("Index new folder", SecondaryTheme)
+                ActionButton::new("索引新文件夹", SecondaryTheme)
                     .with_icon(Icon::FindAll)
                     .on_click(|ctx| {
                         ctx.dispatch_typed_action(CodeSettingsPageAction::ManualAddDirectory);
@@ -1158,7 +1158,7 @@ impl CodePageWidget {
                     .with_cross_axis_alignment(CrossAxisAlignment::Center)
                     .with_child(
                         ui_builder
-                            .span("Initialized / indexed folders")
+                            .span("已初始化 / 已索引的文件夹")
                             .with_style(UiComponentStyles {
                                 font_size: Some(16.0),
                                 font_weight: Some(Weight::Semibold),
@@ -2237,7 +2237,7 @@ impl SettingsWidget for AutoOpenCodeReviewPaneCodeWidget {
     ) -> Box<dyn Element> {
         let general_settings = GeneralSettings::as_ref(app);
         render_body_item::<CodeSettingsPageAction>(
-            "Auto open code review panel".into(),
+            "自动打开代码审查面板（Auto open code review panel）".into(),
             None,
             LocalOnlyIconState::Hidden,
             ToggleState::Enabled,
@@ -2251,7 +2251,7 @@ impl SettingsWidget for AutoOpenCodeReviewPaneCodeWidget {
                     ctx.dispatch_typed_action(CodeSettingsPageAction::ToggleAutoOpenCodeReviewPane);
                 })
                 .finish(),
-            Some("When this setting is on, the code review panel will open on the first accepted diff of a conversation".into()),
+            Some("启用此设置后，代码审查面板将在对话中第一次接受差异时自动打开".into()),
         )
     }
 }
@@ -2314,7 +2314,7 @@ impl SettingsWidget for CodeReviewPanelToggleWidget {
         let tab_settings = TabSettings::as_ref(app);
 
         render_body_item::<CodeSettingsPageAction>(
-            "Show code review button".into(),
+            "显示代码审查按钮（Show code review button）".into(),
             None,
             LocalOnlyIconState::Hidden,
             ToggleState::Enabled,
@@ -2329,7 +2329,7 @@ impl SettingsWidget for CodeReviewPanelToggleWidget {
                 })
                 .finish(),
             Some(
-                "Show a button in the top right of the window to toggle the code review panel."
+                "在窗口右上角显示一个按钮来切换代码审查面板。"
                     .into(),
             ),
         )
@@ -2357,7 +2357,7 @@ impl SettingsWidget for CodeReviewDiffStatsToggleWidget {
         let tab_settings = TabSettings::as_ref(app);
 
         render_body_item::<CodeSettingsPageAction>(
-            "Show diff stats on code review button".into(),
+            "在代码审查按钮上显示差异统计（Show diff stats on code review button）".into(),
             None,
             LocalOnlyIconState::Hidden,
             ToggleState::Enabled,
@@ -2373,7 +2373,7 @@ impl SettingsWidget for CodeReviewDiffStatsToggleWidget {
                     );
                 })
                 .finish(),
-            Some("Show lines added and removed counts on the code review button.".into()),
+            Some("在代码审查按钮上显示添加和删除的行数统计。".into()),
         )
     }
 }
@@ -2399,7 +2399,7 @@ impl SettingsWidget for ProjectExplorerToggleWidget {
         let code_settings = CodeSettings::as_ref(app);
 
         render_body_item::<CodeSettingsPageAction>(
-            "Project explorer".into(),
+            "项目浏览器（Project explorer）".into(),
             None,
             LocalOnlyIconState::Hidden,
             ToggleState::Enabled,
@@ -2414,7 +2414,7 @@ impl SettingsWidget for ProjectExplorerToggleWidget {
                 })
                 .finish(),
             Some(
-                "Adds an IDE-style project explorer / file tree to the left side tools panel."
+                "向左侧工具面板添加 IDE 风格的项目浏览器 / 文件树。"
                     .into(),
             ),
         )
@@ -2442,7 +2442,7 @@ impl SettingsWidget for GlobalSearchToggleWidget {
         let code_settings = CodeSettings::as_ref(app);
 
         render_body_item::<CodeSettingsPageAction>(
-            "Global file search".into(),
+            "全局文件搜索（Global file search）".into(),
             None,
             LocalOnlyIconState::Hidden,
             ToggleState::Enabled,
@@ -2456,7 +2456,7 @@ impl SettingsWidget for GlobalSearchToggleWidget {
                     ctx.dispatch_typed_action(CodeSettingsPageAction::ToggleGlobalSearch);
                 })
                 .finish(),
-            Some("Adds global file search to the left side tools panel.".into()),
+            Some("向左侧工具面板添加全局文件搜索。".into()),
         )
     }
 }

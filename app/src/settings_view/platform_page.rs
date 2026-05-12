@@ -378,8 +378,8 @@ impl PlatformPageWidget {
         appearance: &Appearance,
     ) -> Box<dyn Element> {
         let text = vec![
-            FormattedTextFragment::plain_text("Create and manage API keys to allow other Oz cloud agents to access your Warp account.\nFor more information, visit the "),
-            FormattedTextFragment::hyperlink("Documentation.", API_KEY_DOCS_URL),
+            FormattedTextFragment::plain_text("创建和管理 API 密钥，允许其他 Oz 云智能体访问您的 Warp 账户。\n更多信息，请访问"),
+            FormattedTextFragment::hyperlink("文档。", API_KEY_DOCS_URL),
         ];
 
         let text_element = FormattedTextElement::new(
@@ -413,7 +413,7 @@ impl PlatformPageWidget {
             Flex::row()
                 .with_cross_axis_alignment(CrossAxisAlignment::Center)
                 .with_child(
-                    Text::new_inline("Oz Cloud API Keys", appearance.ui_font_family(), 16.)
+                    Text::new_inline("Oz Cloud API 密钥", appearance.ui_font_family(), 16.)
                         .with_style(Properties::default().weight(Weight::Bold))
                         .with_color(appearance.theme().active_ui_text_color().into())
                         .finish(),
@@ -425,7 +425,7 @@ impl PlatformPageWidget {
                             ButtonVariant::Outlined,
                             self.create_api_key_button_mouse_state.clone(),
                         )
-                        .with_text_label("+ Create API Key".to_string())
+                        .with_text_label("+ 创建 API 密钥".to_string())
                         .build()
                         .on_click(|ctx, _, _| {
                             ctx.dispatch_typed_action(PlatformPageAction::ShowCreateApiKeyModal);
@@ -460,21 +460,21 @@ impl PlatformPageWidget {
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
             .with_main_axis_size(MainAxisSize::Max);
         header_row
-            .add_child(Expanded::new(1., self.render_header_cell(appearance, "Name")).finish());
+            .add_child(Expanded::new(1., self.render_header_cell(appearance, "名称")).finish());
         header_row
-            .add_child(Expanded::new(1., self.render_header_cell(appearance, "Key")).finish());
+            .add_child(Expanded::new(1., self.render_header_cell(appearance, "密钥")).finish());
         if FeatureFlag::TeamApiKeys.is_enabled() {
             header_row.add_child(
-                Expanded::new(1., self.render_header_cell(appearance, "Scope")).finish(),
+                Expanded::new(1., self.render_header_cell(appearance, "范围")).finish(),
             );
         }
         header_row
-            .add_child(Expanded::new(1., self.render_header_cell(appearance, "Created")).finish());
+            .add_child(Expanded::new(1., self.render_header_cell(appearance, "创建时间")).finish());
         header_row.add_child(
-            Expanded::new(1., self.render_header_cell(appearance, "Last used")).finish(),
+            Expanded::new(1., self.render_header_cell(appearance, "最后使用")).finish(),
         );
         header_row.add_child(
-            Expanded::new(1., self.render_header_cell(appearance, "Expires at")).finish(),
+            Expanded::new(1., self.render_header_cell(appearance, "过期时间")).finish(),
         );
         header_row.add_child(Expanded::new(0.5, self.render_header_cell(appearance, "")).finish());
 
@@ -655,7 +655,7 @@ impl PlatformPageWidget {
                     .with_child(
                         Container::new(
                             Text::new(
-                                "No API Keys",
+                                "无 API 密钥",
                                 appearance.ui_font_family(),
                                 SUBHEADER_FONT_SIZE,
                             )
@@ -669,7 +669,7 @@ impl PlatformPageWidget {
                     .with_child(
                         Container::new(
                             Text::new(
-                                "Create a key to manage external access to Warp",
+                                "创建密钥以管理对 Warp 的外部访问",
                                 appearance.ui_font_family(),
                                 CONTENT_FONT_SIZE,
                             )

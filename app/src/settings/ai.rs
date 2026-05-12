@@ -176,24 +176,24 @@ impl VoiceInputToggleKey {
             };
 
         match self {
-            VoiceInputToggleKey::None => "None",
+            VoiceInputToggleKey::None => "无",
             VoiceInputToggleKey::Fn => "Fn",
             VoiceInputToggleKey::AltLeft => {
-                Box::leak(format!("{alt_key_name} (Left)").into_boxed_str())
+                Box::leak(format!("{alt_key_name} (左)").into_boxed_str())
             }
             VoiceInputToggleKey::AltRight => {
-                Box::leak(format!("{alt_key_name} (Right)").into_boxed_str())
+                Box::leak(format!("{alt_key_name} (右)").into_boxed_str())
             }
-            VoiceInputToggleKey::ControlLeft => "Control (Left)",
-            VoiceInputToggleKey::ControlRight => "Control (Right)",
+            VoiceInputToggleKey::ControlLeft => "Control (左)",
+            VoiceInputToggleKey::ControlRight => "Control (右)",
             VoiceInputToggleKey::SuperLeft => {
-                Box::leak(format!("{super_key_name} (Left)").into_boxed_str())
+                Box::leak(format!("{super_key_name} (左)").into_boxed_str())
             }
             VoiceInputToggleKey::SuperRight => {
-                Box::leak(format!("{super_key_name} (Right)").into_boxed_str())
+                Box::leak(format!("{super_key_name} (右)").into_boxed_str())
             }
-            VoiceInputToggleKey::ShiftLeft => "Shift (Left)",
-            VoiceInputToggleKey::ShiftRight => "Shift (Right)",
+            VoiceInputToggleKey::ShiftLeft => "Shift (左)",
+            VoiceInputToggleKey::ShiftRight => "Shift (右)",
         }
     }
 
@@ -371,17 +371,17 @@ impl ThinkingDisplayMode {
     /// Display name for the settings dropdown.
     pub fn display_name(&self) -> &'static str {
         match self {
-            ThinkingDisplayMode::ShowAndCollapse => "Show & collapse",
-            ThinkingDisplayMode::AlwaysShow => "Always show",
-            ThinkingDisplayMode::NeverShow => "Never show",
+            ThinkingDisplayMode::ShowAndCollapse => "显示并折叠",
+            ThinkingDisplayMode::AlwaysShow => "始终显示",
+            ThinkingDisplayMode::NeverShow => "从不显示",
         }
     }
 
     pub fn command_palette_description(&self) -> &'static str {
         match self {
-            ThinkingDisplayMode::ShowAndCollapse => "Set agent thinking display: show & collapse",
-            ThinkingDisplayMode::AlwaysShow => "Set agent thinking display: always show",
-            ThinkingDisplayMode::NeverShow => "Set agent thinking display: never show",
+            ThinkingDisplayMode::ShowAndCollapse => "设置智能体思考显示：显示并折叠",
+            ThinkingDisplayMode::AlwaysShow => "设置智能体思考显示：始终显示",
+            ThinkingDisplayMode::NeverShow => "设置智能体思考显示：从不显示",
         }
     }
 
