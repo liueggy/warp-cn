@@ -5701,7 +5701,7 @@ impl SettingsWidget for OtherAIWidget {
                     app,
                 ))
                 .with_child(render_ai_setting_toggle::<ShouldRenderUseAgentToolbarForUserCommands>(
-                    "显示"使用智能体"底栏（Show \"Use Agent\" footer）",
+                    "显示「使用智能体」底栏（Show Use Agent footer）",
                     AISettingsPageAction::ToggleUseAgentToolbar,
                     *ai_settings.should_render_use_agent_footer_for_user_commands,
                     is_toggleable,
@@ -5710,7 +5710,7 @@ impl SettingsWidget for OtherAIWidget {
                     app,
                 ))
                 .with_child(render_ai_setting_description(
-                    "在长时间运行的命令中提示使用启用"完全终端使用"的智能体。",
+                    "在长时间运行的命令中提示使用启用「完全终端使用」的智能体。",
                     is_toggleable,
                     app,
                 ));
@@ -6503,9 +6503,9 @@ impl ApiKeysWidget {
                 HighlightedHyperlink::default(),
             )
             .with_hyperlink_font_color(appearance.theme().accent().into_solid())
-            .register_default_click_handlers(|url, _, ctx| {
-                ctx.dispatch_typed_action(AISettingsPageAction::HyperlinkClick(HyperlinkUrl::from(url.url.clone())));
-            })
+            .register_default_click_handlers(|url, ctx, _| {
+                    ctx.dispatch_typed_action(AISettingsPageAction::HyperlinkClick(url));
+                })
             .finish();
 
             let ssy_card = Container::new(ssy_description)
