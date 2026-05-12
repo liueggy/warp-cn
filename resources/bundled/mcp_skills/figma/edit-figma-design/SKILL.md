@@ -1,6 +1,6 @@
 ---
-name: edit-figma-design
-description: Create or update Figma designs directly from a written product or UI description using the Figma MCP authoring tools. Use when the user wants a mockup, wireframe, screen, component, flow, or concept designed in Figma from text, or wants to iterate on an existing Figma file from textual feedback. Despite the name, this skill can start from a new blank file or edit an existing one. Do not use for capture-based workflows that turn a running page into Figma; use `figma-generate-design` for those, and use `implement-design` for code implementation requests. Requires Figma MCP server connection.
+name: 编辑 Figma 设计
+description: 使用 Figma MCP 创作工具，直接从书面产品或 UI 描述创建或更新 Figma 设计
 metadata:
   mcp-server: figma
 ---

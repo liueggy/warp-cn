@@ -22,11 +22,11 @@ use crate::{
 };
 
 const AGENT_PROMPT_TO_INTERACT_MESSAGE: &str = "Prompt agent to interact with";
-const AGENT_WAITING_ON_INSTRUCTIONS_MESSAGE: &str = "Agent is waiting on instructions";
-const AGENT_WAITING_FOR_COMMAND_TO_EXIT_MESSAGE: &str = "Agent is waiting for command to exit";
-const AGENT_BLOCKED_MESSAGE: &str = "Agent needs your permission to continue";
-const AGENT_IN_CONTROL_MESSAGE: &str = "Agent is in control";
-const USER_IN_CONTROL_MESSAGE: &str = "User is in control";
+const AGENT_WAITING_ON_INSTRUCTIONS_MESSAGE: &str = "智能体正在等待指令";
+const AGENT_WAITING_FOR_COMMAND_TO_EXIT_MESSAGE: &str = "智能体正在等待命令退出";
+const AGENT_BLOCKED_MESSAGE: &str = "智能体需要你的许可才能继续";
+const AGENT_IN_CONTROL_MESSAGE: &str = "智能体已接管";
+const USER_IN_CONTROL_MESSAGE: &str = "用户已接管";
 
 /// A header rendered as rich content above the active block when Agent View is in inline mode.
 pub struct InlineAgentViewHeader {

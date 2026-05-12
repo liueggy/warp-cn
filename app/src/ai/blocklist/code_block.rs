@@ -237,7 +237,7 @@ fn render_linked_code_block_internal(
             let copy_button = render_button(
                 appearance,
                 Icon::Copy,
-                "Copy",
+                "复制",
                 mouse_handles.copy_button,
                 code_clone.clone(),
                 on_copy,
@@ -325,7 +325,7 @@ fn render_plain_code_block_internal(
             let copy_button = render_button(
                 appearance,
                 Icon::Copy,
-                "Copy",
+                "复制",
                 mouse_handles.copy_button,
                 code_clone.clone(),
                 on_copy,

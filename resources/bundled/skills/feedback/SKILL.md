@@ -1,6 +1,6 @@
 ---
-name: feedback
-description: Turn rough feedback about the Warp app into a filed GitHub issue or duplicate-issue response for `warpdotdev/warp`. Use when the user shares a Warp bug report, regression, confusing UX note, feature gap, or short complaint and wants it clarified into reproduction steps, expected vs actual behavior, concrete impact, and grounded source references from local Warp repos when available.
+name: 反馈
+description: 将关于 Warp 应用的粗略反馈转化为已提交的 GitHub 问题或重复问题回复
 ---
 
 # Feedback

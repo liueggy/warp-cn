@@ -253,7 +253,7 @@ impl InstallationModalBody {
 
         // Renders MCP title text
         let title = Text::new(
-            format!("Install {name}"),
+            format!("安装 {name}"),
             appearance.ui_font_family(),
             appearance.header_font_size(),
         )
@@ -419,9 +419,9 @@ impl InstallationModalBody {
         .finish();
 
         let source_text = if is_shared {
-            "Shared from team"
+            "来自团队共享"
         } else {
-            "From another device"
+            "来自其他设备"
         };
 
         let label_text = Text::new_inline(
@@ -444,7 +444,7 @@ impl InstallationModalBody {
         let cancel_button = appearance
             .ui_builder()
             .button(ButtonVariant::Text, self.cancel_mouse_state.clone())
-            .with_text_label("Cancel".into())
+            .with_text_label("取消".into())
             .with_style(UiComponentStyles {
                 font_weight: Some(Weight::Bold),
                 font_color: Some(appearance.theme().active_ui_text_color().into()),
@@ -481,7 +481,7 @@ impl InstallationModalBody {
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
             .with_child(
                 Text::new_inline(
-                    "Install",
+                    "安装",
                     appearance.ui_font_family(),
                     appearance.ui_font_size(),
                 )
@@ -612,7 +612,7 @@ impl View for InstallationModalBody {
                 .finish()
         } else {
             Text::new(
-                "No MCP server selected",
+                "未选择 MCP 服务器",
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )

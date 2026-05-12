@@ -122,16 +122,16 @@ use ai::diff_validation::{
     SearchAndReplace, V4AHunk,
 };
 
-const REQUESTED_EDIT_CANCEL_LABEL: &str = "Cancel";
-const REQUESTED_EDIT_REFINE_LABEL: &str = "Refine";
-const REQUESTED_EDIT_ACCEPT_LABEL: &str = "Accept";
-const REQUESTED_EDIT_ACCEPT_AND_AUTOEXECUTE_LABEL: &str = "Auto-approve";
-const REQUESTED_EDIT_EDIT_LABEL: &str = "Edit";
-const REQUESTED_EDIT_MINIMIZE_LABEL: &str = "Done";
-const SUGGESTED_EDIT_ACCEPT_LABEL: &str = "Accept";
-const SUGGESTED_EDIT_ACCEPT_AND_CONTINUE_LABEL: &str = "Accept and continue with agent";
-const SUGGESTED_EDIT_ITERATE_WITH_AGENT_LABEL: &str = "Iterate with agent";
-const SUGGESTED_EDIT_DISMISS_LABEL: &str = "Dismiss";
+const REQUESTED_EDIT_CANCEL_LABEL: &str = "取消";
+const REQUESTED_EDIT_REFINE_LABEL: &str = "优化";
+const REQUESTED_EDIT_ACCEPT_LABEL: &str = "接受";
+const REQUESTED_EDIT_ACCEPT_AND_AUTOEXECUTE_LABEL: &str = "自动批准";
+const REQUESTED_EDIT_EDIT_LABEL: &str = "编辑";
+const REQUESTED_EDIT_MINIMIZE_LABEL: &str = "完成";
+const SUGGESTED_EDIT_ACCEPT_LABEL: &str = "接受";
+const SUGGESTED_EDIT_ACCEPT_AND_CONTINUE_LABEL: &str = "接受并继续智能体";
+const SUGGESTED_EDIT_ITERATE_WITH_AGENT_LABEL: &str = "与智能体迭代";
+const SUGGESTED_EDIT_DISMISS_LABEL: &str = "忽略";
 const MAX_EDITOR_HEIGHT: f32 = 500.;
 const INLINE_EDITOR_HEIGHT: f32 = 94.;
 const INLINE_EDITOR_HEIGHT_EXPANDED: f32 = 400.;

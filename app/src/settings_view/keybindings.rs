@@ -57,13 +57,13 @@ const ROW_LEFT_MARGIN: f32 = 20.0;
 const ROW_HEIGHT: f32 = 28.;
 const EDIT_BUTTONS_BORDER_RADIUS: f32 = 4.0;
 
-pub const SEARCH_PLACEHOLDER: &str = "Search by name or by keys (ex. \"cmd d\")";
-const SHORTCUT_CONFLICT_WARNING_TEXT: &str = "This shortcut conflicts with other keybinds";
+pub const SEARCH_PLACEHOLDER: &str = "按名称或快捷键搜索（例 \"cmd d\"）";
+const SHORTCUT_CONFLICT_WARNING_TEXT: &str = "此快捷键与其他快捷键冲突";
 const KEYBINDINGS_PAGE_SHORTCUT: &str = "workspace:toggle_keybindings_page";
-const RESET_BUTTON_TEXT: &str = "Default";
-const CANCEL_BUTTON_TEXT: &str = "Cancel";
-const CLEAR_BUTTON_TEXT: &str = "Clear";
-const SAVE_BUTTON_TEXT: &str = "Save";
+const RESET_BUTTON_TEXT: &str = "默认";
+const CANCEL_BUTTON_TEXT: &str = "取消";
+const CLEAR_BUTTON_TEXT: &str = "清除";
+const SAVE_BUTTON_TEXT: &str = "保存";
 
 /// Notifier for custom keybinding changed. Views could subscribe to this for
 /// KeybindingChangedEvent.

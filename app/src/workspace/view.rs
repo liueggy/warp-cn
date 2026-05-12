@@ -10,6 +10,7 @@ pub(crate) mod launch_modal;
 pub(crate) mod left_panel;
 pub(crate) mod onboarding;
 pub(crate) mod openwarp_launch_modal;
+pub(crate) mod welcome_api_modal;
 pub(crate) mod right_panel;
 mod startup_directory;
 #[cfg(test)]
@@ -145,6 +146,9 @@ use crate::workspace::view::free_tier_limit_hit_modal::{
 use crate::workspace::view::launch_modal::{LaunchModal, LaunchModalEvent, OzLaunchSlide};
 use crate::workspace::view::openwarp_launch_modal::{
     OpenWarpLaunchModal, OpenWarpLaunchModalEvent,
+};
+use crate::workspace::view::welcome_api_modal::{
+    WelcomeApiModal, WelcomeApiModalEvent,
 };
 use crate::workspace::{ForkFromExchange, ForkedConversationDestination};
 use crate::BlocklistAIHistoryModel;
@@ -993,6 +997,7 @@ pub struct Workspace {
     suggested_rule_modal: ViewHandle<SuggestedRuleModal>,
     oz_launch_modal: ModalWithTab<LaunchModal<OzLaunchSlide>>,
     openwarp_launch_modal: ViewHandle<OpenWarpLaunchModal>,
+    welcome_api_modal: ViewHandle<WelcomeApiModal>,
     enable_auto_reload_modal: ViewHandle<EnableAutoReloadModal>,
     build_plan_migration_modal: ViewHandle<BuildPlanMigrationModal>,
     codex_modal: ViewHandle<CodexModal>,
@@ -1213,7 +1218,7 @@ impl Workspace {
                 },
                 ctx,
             );
-            editor.set_placeholder_text("Search repos", ctx);
+            editor.set_placeholder_text("搜索仓库", ctx);
             editor
         });
         ctx.subscribe_to_view(&editor, |me, editor_view, event, ctx| match event {
@@ -1249,7 +1254,7 @@ impl Workspace {
             EditorView::single_line(options, ctx)
         });
         editor.update(ctx, |editor, ctx| {
-            editor.set_placeholder_text("Search tabs...", ctx);
+            editor.set_placeholder_text("搜索标签页...", ctx);
         });
         ctx.subscribe_to_view(&editor, |me, editor_view, event, ctx| match event {
             EditorEvent::Edited(_) => {
@@ -2707,6 +2712,11 @@ impl Workspace {
             me.handle_openwarp_launch_modal_event(event, ctx);
         });
 
+        let welcome_api_modal_view = ctx.add_typed_action_view(WelcomeApiModal::new);
+        ctx.subscribe_to_view(&welcome_api_modal_view, |me, _, event, ctx| {
+            me.handle_welcome_api_modal_event(event, ctx);
+        });
+
         let launch_config_save_modal = Self::build_launch_config_save_modal(ctx);
 
         let tab_config_params_modal = Self::build_tab_config_params_modal(ctx);
@@ -3179,6 +3189,7 @@ impl Workspace {
                 tab_pane_group_id: None,
             },
             openwarp_launch_modal: openwarp_launch_view,
+            welcome_api_modal: welcome_api_modal_view,
             enable_auto_reload_modal,
             agent_management_view,
             notification_mailbox_view,
@@ -8651,7 +8662,7 @@ impl Workspace {
                 .with_height(NEW_SESSION_SIDECAR_SEARCH_BOX_HEIGHT)
                 .finish()
             }),
-            Some("Search repos".to_string()),
+            Some("搜索仓库".to_string()),
         )
         .with_no_interaction_on_hover()
         .no_highlight_on_hover()
@@ -16137,6 +16148,32 @@ impl Workspace {
         }
     }
 
+    fn handle_welcome_api_modal_event(
+        &mut self,
+        event: &WelcomeApiModalEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        match event {
+            WelcomeApiModalEvent::Close => {
+                OneTimeModalModel::handle(ctx).update(ctx, |model, ctx| {
+                    model.mark_welcome_api_modal_dismissed(ctx);
+                });
+                self.focus_active_tab(ctx);
+                ctx.notify();
+            }
+            WelcomeApiModalEvent::GoToSettings => {
+                OneTimeModalModel::handle(ctx).update(ctx, |model, ctx| {
+                    model.mark_welcome_api_modal_dismissed(ctx);
+                });
+                self.focus_active_tab(ctx);
+                ctx.notify();
+                ctx.dispatch_typed_action(&WorkspaceAction::ShowSettingsPage(
+                    SettingsSection::WarpAgent,
+                ));
+            }
+        }
+    }
+
     fn handle_oz_launch_modal_event(
         &mut self,
         event: &LaunchModalEvent,
@@ -22995,6 +23032,10 @@ impl View for Workspace {
 
         if should_show_modal && one_time_modal_model.is_openwarp_launch_modal_open() {
             stack.add_child(ChildView::new(&self.openwarp_launch_modal).finish());
+        }
+
+        if should_show_modal && one_time_modal_model.is_welcome_api_modal_open() {
+            stack.add_child(ChildView::new(&self.welcome_api_modal).finish());
         }
 
         if let Some(hoa_flow) = &self.hoa_onboarding_flow {

@@ -190,7 +190,7 @@ impl AgentNotificationsModel {
                         title,
                         message
                             .clone()
-                            .unwrap_or_else(|| "Waiting for input.".to_owned()),
+                            .unwrap_or_else(|| "等待输入。".to_owned()),
                         NotificationCategory::Request,
                         NotificationSourceAgent::CLI {
                             agent: *agent,

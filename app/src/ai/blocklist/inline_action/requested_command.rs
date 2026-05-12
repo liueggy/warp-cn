@@ -76,17 +76,17 @@ use super::inline_action_icons::{self, icon_size};
 /// For horizontal padding, use [`INLINE_ACTION_HORIZONTAL_PADDING`] for consistency.
 pub const REQUESTED_COMMAND_BODY_VERTICAL_PADDING: f32 = 16.;
 
-const REQUESTED_COMMAND_REJECT_LABEL: &str = "Reject";
-const REQUESTED_COMMAND_ACCEPT_LABEL: &str = "Run";
-const REQUESTED_COMMAND_EDIT_LABEL: &str = "Edit";
-const REQUESTED_COMMAND_MINIMIZE_LABEL: &str = "Done";
+const REQUESTED_COMMAND_REJECT_LABEL: &str = "拒绝";
+const REQUESTED_COMMAND_ACCEPT_LABEL: &str = "运行";
+const REQUESTED_COMMAND_EDIT_LABEL: &str = "编辑";
+const REQUESTED_COMMAND_MINIMIZE_LABEL: &str = "完成";
 
-const LOADING_MESSAGE: &str = "Generating command...";
-const COMMAND_WAITING_FOR_USER_MESSAGE: &str = "OK if I run this command and read the output?";
-const MCP_TOOL_WAITING_FOR_USER_MESSAGE: &str = "OK if I call this MCP tool?";
-const MONITORING_COMMAND_MESSAGE: &str = "Agent is monitoring command...";
-const AGENT_NEEDS_INPUT_MESSAGE: &str = "Agent needs your input to continue";
-const USER_TOOK_CONTROL_COMMAND_MESSAGE: &str = "User is in control.";
+const LOADING_MESSAGE: &str = "正在生成命令...";
+const COMMAND_WAITING_FOR_USER_MESSAGE: &str = "可以运行此命令并读取输出吗？";
+const MCP_TOOL_WAITING_FOR_USER_MESSAGE: &str = "可以调用此 MCP 工具吗？";
+const MONITORING_COMMAND_MESSAGE: &str = "智能体正在监控命令...";
+const AGENT_NEEDS_INPUT_MESSAGE: &str = "智能体需要你的输入才能继续";
+const USER_TOOK_CONTROL_COMMAND_MESSAGE: &str = "用户已接管控制。";
 const USER_STOPPED_CLI_SUBAGENT_COMMAND_MESSAGE: &str = "Paused agent. User is in control.";
 const AGENT_REQUESTED_USER_TAKE_CONTROL_COMMAND_MESSAGE: &str = "User in control";
 const AGENT_ERRORED_COMMAND_MESSAGE: &str = "Agent ran into an issue. Take over control.";

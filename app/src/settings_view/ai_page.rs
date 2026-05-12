@@ -54,7 +54,8 @@ use warp_core::features::FeatureFlag;
 use warp_core::ui::theme::color::internal_colors;
 use warpui::elements::{
     Border, ChildView, ConstrainedBox, CornerRadius, CrossAxisAlignment, Dismiss, Expanded, Fill,
-    HyperlinkLens, MainAxisAlignment, MainAxisSize, MouseStateHandle, Radius, Shrinkable, Text,
+    HyperlinkLens, MainAxisAlignment, MainAxisSize, MouseStateHandle, Padding, Radius, Shrinkable,
+    Text,
 };
 use warpui::fonts::{Properties, Weight};
 use warpui::id;
@@ -134,7 +135,8 @@ use crate::{
 };
 use crate::{report_error, report_if_error, send_telemetry_from_ctx};
 use crate::{TelemetryEvent, UserWorkspaces};
-use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
+use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine, FormattedTextStyles};
+use markdown_parser::weight::CustomWeight;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -6472,6 +6474,54 @@ impl ApiKeysWidget {
                 // create extra space between the description and the API key inputs.
                 .with_margin_bottom(-styles::DESCRIPTION_MARGIN_BOTTOM).finish()
             );
+
+        // warp-cn: 胜算云品牌信息卡片
+        {
+            let ssy_url = "https://www.shengsuanyun.com/?from=CH_3G9WAVFJ";
+            let status_url = "https://watch.shengsuanyun.com/status/shengsuanyun";
+
+            let ssy_description_fragments = vec![
+                FormattedTextFragment::plain_text("胜算云"),
+                FormattedTextFragment {
+                    text: "（SSYCloud）".into(),
+                    styles: FormattedTextStyles {
+                        weight: Some(CustomWeight::Semibold),
+                        ..Default::default()
+                    },
+                },
+                FormattedTextFragment::plain_text("是专为 AI Native Teams 服务的超级工厂，工业级 AI 任务并行执行平台。模型商城集采直供聚合接入了 Claude、ChatGPT、Gemini 等海内外 LLM 及图片视频多媒体模型算力，绝无逆向掺水、全站模型 SLA 可用性高达 99.7%。更有企业级专属定制网关，实现团队精细化成本与权限管控，智能路由+安全防护+BYOK 企业自带密钥托管。"),
+                FormattedTextFragment::hyperlink("了解更多", ssy_url),
+                FormattedTextFragment::plain_text("  |  "),
+                FormattedTextFragment::hyperlink("服务状态", status_url),
+            ];
+
+            let ssy_description = FormattedTextElement::new(
+                FormattedText::new([FormattedTextLine::Line(ssy_description_fragments)]),
+                CONTENT_FONT_SIZE,
+                appearance.ui_font_family(),
+                appearance.monospace_font_family(),
+                blended_colors::text_sub(appearance.theme(), appearance.theme().surface_1()),
+                HighlightedHyperlink::default(),
+            )
+            .with_hyperlink_font_color(appearance.theme().accent().into_solid())
+            .register_default_click_handlers(|url, _, ctx| {
+                ctx.open_url(&url.url);
+            })
+            .finish();
+
+            let ssy_card = Container::new(ssy_description)
+                .with_padding(
+                    Padding::uniform(12.)
+                        .with_left(16.)
+                        .with_right(16.)
+                )
+                .with_background(appearance.theme().surface_2())
+                .with_corner_radius(CornerRadius::with_all(Radius::Pixels(8.)))
+                .with_border(Border::all(1.).with_border_fill(Fill::Solid(appearance.theme().surface_3().into_solid())))
+                .finish();
+
+            column.add_child(ssy_card);
+        }
 
         /// Helper function to render the UI for an API key input field.
         fn render_api_key_input(

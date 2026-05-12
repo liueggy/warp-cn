@@ -149,6 +149,16 @@ define_settings_group!(GeneralSettings, settings: [
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::No),
         private: true,
     },
+    // One-time flag tracking whether the warp-cn welcome API modal has already
+    // been shown to the user. Not user-visible; modeled as a setting so it's
+    // only shown once per user regardless of the number of devices they use.
+    did_check_to_trigger_welcome_api_modal: DidShowWelcomeApiModal {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::No),
+        private: true,
+    },
     anonymous_user_ai_sign_up_banner_shown: AnonymousUserAISignUpBannerShown {
         type: bool,
         default: false,

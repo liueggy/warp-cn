@@ -132,7 +132,7 @@ pub struct MCPServersEditPageView {
 impl MCPServersEditPageView {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let save_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Save", PrimaryTheme)
+            ActionButton::new("保存", PrimaryTheme)
                 .with_icon(Icon::Check)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(MCPServersEditPageViewAction::Save);
@@ -140,13 +140,13 @@ impl MCPServersEditPageView {
         });
 
         let reinstall_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Edit Variables", PrimaryTheme).on_click(|ctx| {
+            ActionButton::new("编辑变量", PrimaryTheme).on_click(|ctx| {
                 ctx.dispatch_typed_action(MCPServersEditPageViewAction::Reinstall);
             })
         });
 
         let delete_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Delete MCP", DangerSecondaryTheme)
+            ActionButton::new("删除 MCP", DangerSecondaryTheme)
                 .with_icon(Icon::Trash)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(MCPServersEditPageViewAction::Delete);
@@ -154,7 +154,7 @@ impl MCPServersEditPageView {
         });
 
         let unshare_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Remove from team", DangerNakedTheme)
+            ActionButton::new("从团队移除", DangerNakedTheme)
                 .with_icon(Icon::MinusCircle)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(MCPServersEditPageViewAction::Unshare);
@@ -187,7 +187,7 @@ impl MCPServersEditPageView {
 
         let editing_disabled_banner = ctx.add_typed_action_view(|_| {
             Banner::new_without_close(BannerTextContent::plain_text(
-                "Only team admins and the creator of the MCP server can edit the MCP server.",
+                "仅团队管理员和 MCP 服务器的创建者可以编辑该服务器。",
             ))
             .with_icon(Icon::Warning)
         });
@@ -312,11 +312,11 @@ impl MCPServersEditPageView {
     fn render_header(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
         let title = if self.server_card_item_id.is_none() {
-            "Add New MCP Server".to_string()
+            "添加新 MCP 服务器".to_string()
         } else if let Some(name) = self.server_model.name() {
-            format!("Edit {name} MCP Server")
+            format!("编辑 {name} MCP 服务器")
         } else {
-            "Edit MCP Server".to_string()
+            "编辑 MCP 服务器".to_string()
         };
 
         let ui_builder = appearance.ui_builder().clone();
@@ -326,7 +326,7 @@ impl MCPServersEditPageView {
             false,
             self.log_out_icon_button_mouse_handle.clone(),
         )
-        .with_tooltip(move || ui_builder.tool_tip("Log out".to_string()).build().finish())
+        .with_tooltip(move || ui_builder.tool_tip("登出".to_string()).build().finish())
         .build()
         .on_click(|ctx, _, _| ctx.dispatch_typed_action(MCPServersEditPageViewAction::LogOut))
         .finish();
@@ -538,12 +538,12 @@ impl MCPServersEditPageView {
             let window_id = ctx.window_id();
             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                 toast_stack.add_ephemeral_toast(
-                    DismissibleToast::error("This MCP server contains secrets. Visit Settings > Privacy to modify your secret redaction settings.".to_string()),
+                    DismissibleToast::error("此 MCP 服务器包含密钥。请前往 设置 > 隐私 修改密钥脱敏设置。".to_string()),
                     window_id,
                     ctx,
                 );
             });
-            return Err("This MCP server contains secrets. Visit Settings > Privacy to modify your secret redaction settings.".to_string());
+            return Err("此 MCP 服务器包含密钥。请前往 设置 > 隐私 修改密钥脱敏设置。".to_string());
         }
 
         Ok(())
@@ -598,13 +598,13 @@ impl MCPServersEditPageView {
             let window_id = ctx.window_id();
             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                 toast_stack.add_ephemeral_toast(
-                    DismissibleToast::error("No MCP Server specified.".to_string()),
+                    DismissibleToast::error("未指定 MCP 服务器。".to_string()),
                     window_id,
                     ctx,
                 );
             });
 
-            return Err("No MCP Server specified.".to_string());
+            return Err("未指定 MCP 服务器。".to_string());
         }
 
         if parsed_templatable_mcp_servers.len() > 1 {
@@ -612,7 +612,7 @@ impl MCPServersEditPageView {
             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                 toast_stack.add_ephemeral_toast(
                     DismissibleToast::error(
-                        "Cannot add multiple MCP servers while editing a single server."
+                        "编辑单个服务器时无法同时添加多个 MCP 服务器。"
                             .to_string(),
                     ),
                     window_id,
@@ -621,7 +621,7 @@ impl MCPServersEditPageView {
             });
 
             return Err(
-                "Cannot add multiple MCP servers while editing a single server.".to_string(),
+                "编辑单个服务器时无法同时添加多个 MCP 服务器。".to_string(),
             );
         }
 

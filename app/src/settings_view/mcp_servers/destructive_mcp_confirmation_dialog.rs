@@ -59,22 +59,22 @@ impl From<&DestructiveMCPConfirmationDialogVariant>
     fn from(variant: &DestructiveMCPConfirmationDialogVariant) -> Self {
         match *variant {
             DestructiveMCPConfirmationDialogVariant::DeleteLocal => DestructiveMCPConfirmationDialogDisplayOptions::new(
-                "Delete MCP server?".to_string(),
-                "This will uninstall and remove this MCP server from all your devices.".to_string(),
-                "Delete MCP".to_string(),
-                "Cancel".to_string(),
+                "删除 MCP 服务器？".to_string(),
+                "将从你的所有设备上卸载并移除此 MCP 服务器。".to_string(),
+                "删除 MCP".to_string(),
+                "取消".to_string(),
             ),
             DestructiveMCPConfirmationDialogVariant::DeleteShared => DestructiveMCPConfirmationDialogDisplayOptions::new(
-                "Delete shared MCP server?".to_string(),
-                "This will not only delete this MCP server for yourself, but also uninstall and remove this MCP server from Warp and across all of your teammates' devices.".to_string(),
-                "Delete MCP".to_string(),
-                "Cancel".to_string(),
+                "删除共享的 MCP 服务器？".to_string(),
+                "这不仅会为你删除此 MCP 服务器，还会从 Warp 及你所有团队成员的设备上卸载并移除此 MCP 服务器。".to_string(),
+                "删除 MCP".to_string(),
+                "取消".to_string(),
             ),
             DestructiveMCPConfirmationDialogVariant::Unshare => DestructiveMCPConfirmationDialogDisplayOptions::new(
-                "Remove shared MCP server from team?".to_string(),
-                "This will uninstall and remove this MCP server from Warp and across all of your teammates' devices.".to_string(),
-                "Remove from team".to_string(),
-                "Cancel".to_string(),
+                "从团队移除共享的 MCP 服务器？".to_string(),
+                "将从 Warp 及你所有团队成员的设备上卸载并移除此 MCP 服务器。".to_string(),
+                "从团队移除".to_string(),
+                "取消".to_string(),
             ),
         }
     }

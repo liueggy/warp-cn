@@ -1,6 +1,6 @@
 ---
-name: create-tab-config
-description: Create new Warp tab config TOML files from natural-language requests. Use when the user wants a new tab config, a new tab layout, or asks for a slash command to generate a tab config.
+name: 创建标签配置
+description: 从自然语言请求创建新的 Warp 标签配置 TOML 文件
 ---
 
 # create-tab-config

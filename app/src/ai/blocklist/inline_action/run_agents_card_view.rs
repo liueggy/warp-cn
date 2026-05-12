@@ -291,7 +291,7 @@ impl RunAgentsCardView {
         let accept_keystroke = ENTER_KEYSTROKE.clone();
 
         let reject_button = CompactibleActionButton::new(
-            "Reject".to_string(),
+            "拒绝".to_string(),
             Some(KeystrokeSource::Fixed(reject_keystroke)),
             ButtonSize::Small,
             RunAgentsCardViewAction::Reject,
@@ -300,7 +300,7 @@ impl RunAgentsCardView {
             ctx,
         );
         let edit_button = CompactibleActionButton::new(
-            "Edit".to_string(),
+            "编辑".to_string(),
             Some(KeystrokeSource::Fixed(edit_keystroke)),
             ButtonSize::Small,
             RunAgentsCardViewAction::ToggleEdit,
@@ -310,7 +310,7 @@ impl RunAgentsCardView {
         );
         // Both primary and chevron click route to Accept.
         let accept_button = CompactibleSplitActionButton::new(
-            "Accept".to_string(),
+            "接受".to_string(),
             Some(KeystrokeSource::Fixed(accept_keystroke)),
             ButtonSize::Small,
             RunAgentsCardViewAction::Accept,
@@ -501,7 +501,7 @@ impl RunAgentsCardView {
             )
         } else {
             (
-                "Edit".to_string(),
+                "编辑".to_string(),
                 Keystroke::parse("cmdorctrl-e")
                     .expect("orchestrate edit keystroke literal must parse"),
             )

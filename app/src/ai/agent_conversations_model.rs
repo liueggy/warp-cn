@@ -434,16 +434,16 @@ impl std::fmt::Display for AgentRunDisplayStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AgentRunDisplayStatus::TaskQueued => write!(f, "Queued"),
-            AgentRunDisplayStatus::TaskPending => write!(f, "Pending"),
+            AgentRunDisplayStatus::TaskPending => write!(f, "等待中"),
             AgentRunDisplayStatus::TaskClaimed => write!(f, "Claimed"),
             AgentRunDisplayStatus::TaskInProgress
             | AgentRunDisplayStatus::ConversationInProgress => write!(f, "In progress"),
             AgentRunDisplayStatus::TaskSucceeded | AgentRunDisplayStatus::ConversationSucceeded => {
                 write!(f, "Done")
             }
-            AgentRunDisplayStatus::TaskFailed => write!(f, "Failed"),
+            AgentRunDisplayStatus::TaskFailed => write!(f, "失败"),
             AgentRunDisplayStatus::TaskError | AgentRunDisplayStatus::ConversationError => {
-                write!(f, "Error")
+                write!(f, "错误")
             }
             AgentRunDisplayStatus::TaskBlocked { .. }
             | AgentRunDisplayStatus::ConversationBlocked { .. } => write!(f, "Blocked"),

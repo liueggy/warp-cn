@@ -39,7 +39,7 @@ use super::common::render_scrollable_collapsible_content;
 use super::output::{action_icon, Props};
 use super::WithContentItemSpacing;
 
-const GENERATING_TITLE_PLACEHOLDER: &str = "Generating title...";
+const GENERATING_TITLE_PLACEHOLDER: &str = "正在生成标题...";
 const ORCHESTRATION_COLLAPSED_MAX_HEIGHT: f32 = 200.;
 
 fn agent_display_name_from_id(

@@ -25,6 +25,8 @@ pub struct OneTimeModalModel {
     is_openwarp_launch_modal_open: bool,
     /// Whether the HOA onboarding flow is currently being shown.
     is_hoa_onboarding_open: bool,
+    /// Whether the warp-cn welcome API modal is currently being shown.
+    is_welcome_api_modal_open: bool,
     /// The window ID where the currently open one-time modal should be displayed.
     /// This is captured when a modal is first opened and ensures the modal stays on that window.
     target_window_id: Option<WindowId>,
@@ -45,7 +47,7 @@ impl OneTimeModalModel {
         );
 
         // Subscribe to auth manager events to automatically trigger modal when user becomes onboarded
-        ctx.subscribe_to_model(&AuthManager::handle(ctx), |_, event, ctx| {
+        ctx.subscribe_to_model(&AuthManager::handle(ctx), |me, event, ctx| {
             let AuthManagerEvent::AuthComplete = event else {
                 return;
             };
@@ -81,6 +83,22 @@ impl OneTimeModalModel {
                         log::warn!("Failed to mark OpenWarp launch modal as dismissed: {e}");
                     }
                 });
+
+                // warp-cn: For skip_login builds (new users), show the welcome API modal.
+                if !*GeneralSettings::as_ref(ctx)
+                    .did_check_to_trigger_welcome_api_modal
+                    .value()
+                {
+                    GeneralSettings::handle(ctx).update(ctx, |settings, ctx| {
+                        if let Err(e) = settings
+                            .did_check_to_trigger_welcome_api_modal
+                            .set_value(true, ctx)
+                        {
+                            log::warn!("Failed to mark welcome API modal as dismissed: {e}");
+                        }
+                    });
+                    me.set_welcome_api_modal_open(true, ctx);
+                }
             }
         });
 
@@ -89,6 +107,7 @@ impl OneTimeModalModel {
             is_oz_launch_modal_open: false,
             is_openwarp_launch_modal_open: false,
             is_hoa_onboarding_open: false,
+            is_welcome_api_modal_open: false,
             target_window_id: None,
         }
     }
@@ -116,6 +135,15 @@ impl OneTimeModalModel {
         self.set_openwarp_launch_modal_open(false, ctx);
     }
 
+    /// Returns whether the warp-cn welcome API modal is currently open.
+    pub fn is_welcome_api_modal_open(&self) -> bool {
+        self.is_welcome_api_modal_open && self.target_window_id.is_some()
+    }
+
+    pub fn mark_welcome_api_modal_dismissed(&mut self, ctx: &mut ModelContext<Self>) {
+        self.set_welcome_api_modal_open(false, ctx);
+    }
+
     /// Returns whether the HOA onboarding flow is currently open.
     pub fn is_hoa_onboarding_open(&self) -> bool {
         self.is_hoa_onboarding_open && self.target_window_id.is_some()
@@ -130,7 +158,8 @@ impl OneTimeModalModel {
         (self.is_oz_launch_modal_open
             || self.is_openwarp_launch_modal_open
             || self.is_build_plan_migration_modal_open
-            || self.is_hoa_onboarding_open)
+            || self.is_hoa_onboarding_open
+            || self.is_welcome_api_modal_open)
             && self.target_window_id.is_some()
     }
 
@@ -170,6 +199,19 @@ impl OneTimeModalModel {
     ) -> bool {
         if self.is_openwarp_launch_modal_open != is_open {
             self.is_openwarp_launch_modal_open = is_open;
+            ctx.emit(OneTimeModalEvent::VisibilityChanged { is_open });
+            return true;
+        }
+        false
+    }
+
+    fn set_welcome_api_modal_open(
+        &mut self,
+        is_open: bool,
+        ctx: &mut ModelContext<Self>,
+    ) -> bool {
+        if self.is_welcome_api_modal_open != is_open {
+            self.is_welcome_api_modal_open = is_open;
             ctx.emit(OneTimeModalEvent::VisibilityChanged { is_open });
             return true;
         }

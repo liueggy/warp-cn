@@ -148,7 +148,7 @@ pub const LOAD_OUTPUT_MESSAGE_FOR_FILE_GLOB: &str = "查找文件中...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_RUNNING_COMMAND: &str = "执行命令中...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_WRITING_TO_COMMAND: &str = "写入命令输入中...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_WAITING_FOR_COMMAND_COMPLETION: &str =
-    "Waiting for command to exit...";
+    "正在等待命令退出...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_WEB_SEARCH: &str = "Searching the web...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_FETCHING_REVIEW_COMMENTS: &str = "Fetching PR comments...";
 
@@ -161,7 +161,7 @@ pub const BLOCKED_ACTION_MESSAGE_FOR_READING_FILES: &str = "Grant access to the 
 pub const BLOCKED_ACTION_MESSAGE_FOR_SEARCHING_CODEBASE: &str =
     "Grant access to the following repository?";
 pub const BLOCKED_ACTION_MESSAGE_FOR_GREP_OR_FILE_GLOB: &str =
-    "OK if I search the files in this directory?";
+    "可以搜索此目录中的文件吗？";
 
 const BLOCKLIST_VISUAL_SECTION_HEIGHT_LINE_MULTIPLIER: f32 = 10.0;
 const INLINE_IMAGE_HEIGHT: f32 = 164.;
