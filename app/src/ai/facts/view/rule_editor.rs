@@ -28,8 +28,8 @@ use super::{is_delete_allowed, style, AIFact, CloudAIFact, CloudAIFactModel};
 use crate::ai::facts::AIMemory;
 use crate::ui_components::icons::Icon;
 
-const RULE_NAME_PLACEHOLDER_TEXT: &str = "e.g. Rust rules";
-const RULE_DESCRIPTION_PLACEHOLDER_TEXT: &str = "e.g. Never use unwrap in Rust";
+const RULE_NAME_PLACEHOLDER_TEXT: &str = "例如：Rust 规则";
+const RULE_DESCRIPTION_PLACEHOLDER_TEXT: &str = "例如：在 Rust 中绝不使用 unwrap";
 
 #[derive(Debug, Clone, Copy)]
 enum EditorType {
@@ -134,7 +134,7 @@ impl RuleEditorView {
         });
 
         let save_button = ctx.add_typed_action_view(|ctx| {
-            let mut button = ActionButton::new("Save", PrimaryTheme)
+            let mut button = ActionButton::new("保存", PrimaryTheme)
                 .with_icon(Icon::Check)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(RuleEditorViewAction::Save);
@@ -145,7 +145,7 @@ impl RuleEditorView {
         });
 
         let delete_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Delete rule", DangerSecondaryTheme)
+            ActionButton::new("删除规则", DangerSecondaryTheme)
                 .with_icon(Icon::Trash)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(RuleEditorViewAction::Delete);
@@ -258,9 +258,9 @@ impl RuleEditorView {
 
     fn render_header(&self, appearance: &Appearance) -> Box<dyn Element> {
         let title = if self.ai_fact.is_none() {
-            "Add Rule"
+            "添加规则"
         } else {
-            "Edit Rule"
+            "编辑规则"
         };
         Container::new(
             Flex::row()
@@ -333,13 +333,13 @@ impl RuleEditorView {
     fn render_form(&self, appearance: &Appearance) -> Box<dyn Element> {
         Flex::column()
             .with_child(
-                Container::new(appearance.ui_builder().span("Name").build().finish())
+                Container::new(appearance.ui_builder().span("名称").build().finish())
                     .with_margin_bottom(style::ITEM_BOTTOM_MARGIN)
                     .finish(),
             )
             .with_child(self.render_name_editor(appearance))
             .with_child(
-                Container::new(appearance.ui_builder().span("Rule").build().finish())
+                Container::new(appearance.ui_builder().span("规则").build().finish())
                     .with_margin_bottom(style::ITEM_BOTTOM_MARGIN)
                     .finish(),
             )

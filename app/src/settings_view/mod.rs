@@ -253,7 +253,7 @@ impl Display for SettingsSection {
             SettingsSection::CodeIndexing => write!(f, "索引与项目"),
             SettingsSection::EditorAndCodeReview => write!(f, "编辑器与代码审查"),
             SettingsSection::CloudEnvironments => write!(f, "环境"),
-            SettingsSection::OzCloudAPIKeys => write!(f, "Oz Cloud API Keys"),
+            SettingsSection::OzCloudAPIKeys => write!(f, "Oz Cloud API 密钥"),
         }
     }
 }
