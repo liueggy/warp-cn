@@ -1,6 +1,6 @@
 [package]
 authors = ["Warp Team <dev@warp.dev>"]
-default-run = "warp-oss"
+default-run = "warp-cn"
 description = "The cloud-backed terminal for individuals and teams"
 edition = "2021"
 autobins = false
@@ -18,7 +18,7 @@ path = "src/lib.rs"
 # flag overrides). Otherwise these binaries are exactly identical to our main binary.
 
 [[bin]]
-name = "warp-oss"
+name = "warp-cn"
 path = "src/bin/oss.rs"
 test = false
 
@@ -933,11 +933,11 @@ cloud_mode_input_v2 = ["cloud_mode"]
 configurable_context_window = []
 handoff_cloud_cloud = ["cloud_mode_setup_v2"]
 
-[package.metadata.bundle.bin.warp-oss]
+[package.metadata.bundle.bin.warp-cn]
 category = "public.app-category.developer-tools"
 copyright = "© 2025, Denver Technologies, Inc"
-identifier = "dev.warp.WarpOss"
-name = "WarpOss"
+identifier = "cn.warp.WarpCn"
+name = "WarpCn"
 resources = ["assets/onboarding"]
 icon = ["channels/oss/icon/no-padding/512x512.png", "channels/oss/icon/no-padding/icon.ico"]
 short_description = "The open-source, cloud-backed terminal for individuals and teams."

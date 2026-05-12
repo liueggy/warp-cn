@@ -90,24 +90,24 @@ jobs:
 
           # Build the binary
           cd app
-          cargo build --profile release-lto --bin warp-oss --target "$TARGET" --features "$FEATURES"
+          cargo build --profile release-lto --bin warp-cn --target "$TARGET" --features "$FEATURES"
           cd ..
 
           # Bundle into .app using cargo-bundle
           cd app
-          cargo bundle --profile release-lto --bin warp-oss --target "$TARGET" --features "$FEATURES"
+          cargo bundle --profile release-lto --bin warp-cn --target "$TARGET" --features "$FEATURES"
           cd ..
 
           # Set variables
           BUNDLE_DIR="target/$TARGET/release-lto/bundle/osx"
-          APP_NAME="WarpOss"
+          APP_NAME="WarpCn"
           APP_PATH="$BUNDLE_DIR/$APP_NAME.app"
 
           # Add rpath for frameworks
-          install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_PATH/Contents/MacOS/warp-oss"
+          install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_PATH/Contents/MacOS/warp-cn"
 
           # Update plist
-          export WARP_SCHEME_NAME="warposs"
+          export WARP_SCHEME_NAME="warpcn"
           export WARP_PLIST_PATH="$APP_PATH/Contents/Info.plist"
           ./script/update_plist
 
@@ -115,7 +115,7 @@ jobs:
           plutil -insert NSDockTilePlugIn -string "WarpDockTilePlugin.docktileplugin" "$APP_PATH/Contents/Info.plist" || true
 
           # Add SMAuthorizedClients
-          plutil -insert SMAuthorizedClients -xml "<array><string>dev.warp.WarpOss</string></array>" "$APP_PATH/Contents/Info.plist" || true
+          plutil -insert SMAuthorizedClients -xml "<array><string>cn.warp.WarpCn</string></array>" "$APP_PATH/Contents/Info.plist" || true
 
           # Add LSBackgroundOnly
           plutil -insert LSBackgroundOnly -bool false "$APP_PATH/Contents/Info.plist" || true
@@ -129,23 +129,23 @@ jobs:
 
           # Create CLI wrapper
           mkdir -p "$BUNDLED_RESOURCES_DIR/bin"
-          cat > "$BUNDLED_RESOURCES_DIR/bin/warp-oss" << 'SCRIPT'
+          cat > "$BUNDLED_RESOURCES_DIR/bin/warp-cn" << 'SCRIPT'
           #!/bin/bash
           script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-          exec -a "$0" "$script_dir/../../MacOS/warp-oss" "$@"
+          exec -a "$0" "$script_dir/../../MacOS/warp-cn" "$@"
           SCRIPT
-          chmod +x "$BUNDLED_RESOURCES_DIR/bin/warp-oss"
+          chmod +x "$BUNDLED_RESOURCES_DIR/bin/warp-cn"
 
           # Create DMG
-          DMG_DIR="$BUNDLE_DIR/dmg/warp-oss"
+          DMG_DIR="$BUNDLE_DIR/dmg/warp-cn"
           mkdir -p "$DMG_DIR"
           cp -R "$APP_PATH" "$DMG_DIR/"
 
-          DMG_NAME="WarpOss-${{ inputs.arch }}.dmg"
+          DMG_NAME="WarpCn-${{ inputs.arch }}.dmg"
           DMG_PATH="$BUNDLE_DIR/$DMG_NAME"
 
           create-dmg \
-            --volname Warp \
+            --volname Warp-CN \
             --no-internet-enable \
             --icon-size 128 \
             --window-size 700 500 \

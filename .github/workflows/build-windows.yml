@@ -48,13 +48,13 @@ jobs:
       - name: Install cargo-about
         run: cargo install --locked cargo-about@0.8.4
 
-      - name: Build warp-oss
+      - name: Build warp-cn
         env:
           GIT_RELEASE_TAG: ${{ inputs.release_tag }}
           CARGO_FULL_PROFILE: rlto
         run: |
           $FEATURES = "release_bundle,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
-          cargo build -p warp --profile rlto --bin warp-oss --features $FEATURES --target x86_64-pc-windows-msvc
+          cargo build -p warp --profile rlto --bin warp-cn --features $FEATURES --target x86_64-pc-windows-msvc
 
       - name: Prepare bundled resources
         env:
@@ -78,7 +78,7 @@ jobs:
           $ISCC_ARGS = @(
             "$INSTALLER_DIR\windows-installer.iss",
             "/DReleaseChannel=oss",
-            "/DMyAppExeName=warp-oss.exe",
+            "/DMyAppExeName=warp-cn.exe",
             "/DTargetProfileDir=$TARGET_DIR",
             "/DMyAppName=Warp-CN",
             "/DMyAppVersion=${{ inputs.release_tag }}",
