@@ -277,7 +277,7 @@ pub fn parse_uname_output(output: &str) -> Result<RemotePlatform> {
 /// - dev:         `~/.warp-dev/remote-server`
 /// - local:       `~/.warp-local/remote-server`
 /// - integration: `~/.warp-dev/remote-server`
-/// - warp-oss:    `~/.warp-oss/remote-server`
+/// - warp-cn:     `~/.warp-cn/remote-server`
 pub fn remote_server_dir() -> String {
     let warp_dir = match ChannelState::channel() {
         Channel::Stable => ".warp",
@@ -285,7 +285,7 @@ pub fn remote_server_dir() -> String {
         Channel::Dev | Channel::Integration => ".warp-dev",
         Channel::Local => ".warp-local",
         Channel::Oss => {
-            // TODO(alokedesai): need to figure out how remote server works with warp-oss
+            // TODO(alokedesai): need to figure out how remote server works with warp-cn
             // For now, return what Dev returns.
             ".warp-dev"
         }
@@ -433,7 +433,7 @@ fn download_channel() -> &'static str {
         Channel::Preview => "preview",
         Channel::Dev | Channel::Local | Channel::Integration => "dev",
         Channel::Oss => {
-            // TODO(alokedesai): need to figure out how remote server works with warp-oss
+            // TODO(alokedesai): need to figure out how remote server works with warp-cn
             // For now, return what Dev returns.
             "dev"
         }
