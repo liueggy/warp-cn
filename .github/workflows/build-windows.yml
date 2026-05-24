@@ -13,9 +13,11 @@ on:
         required: true
         default: 'v0.2.0'
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
-  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 
 jobs:
   build-windows:
@@ -25,6 +27,15 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+
+      - name: Resolve release tag
+        shell: pwsh
+        run: |
+          $tag = '${{ github.event.inputs.release_tag }}'
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            $tag = '${{ github.ref_name }}'
+          }
+          "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Install Rust toolchain
         run: |
