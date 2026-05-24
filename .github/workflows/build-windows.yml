@@ -3,6 +3,9 @@
 name: Build Windows Installer
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       release_tag:
@@ -12,6 +15,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 
 jobs:
   build-windows:
@@ -50,7 +54,7 @@ jobs:
 
       - name: Build warp-cn
         env:
-          GIT_RELEASE_TAG: ${{ inputs.release_tag }}
+          GIT_RELEASE_TAG: ${{ env.RELEASE_TAG }}
           CARGO_FULL_PROFILE: rlto
         run: |
           $FEATURES = "release_bundle,skip_login,skip_firebase_anonymous_user,gui,nld_improvements"
@@ -58,7 +62,7 @@ jobs:
 
       - name: Prepare bundled resources
         env:
-          GIT_RELEASE_TAG: ${{ inputs.release_tag }}
+          GIT_RELEASE_TAG: ${{ env.RELEASE_TAG }}
           CARGO_FULL_PROFILE: rlto
         run: |
           $TARGET_DIR = "target\x86_64-pc-windows-msvc\rlto"
@@ -81,7 +85,7 @@ jobs:
             "/DMyAppExeName=warp-cn.exe",
             "/DTargetProfileDir=$TARGET_DIR",
             "/DMyAppName=Warp-CN",
-            "/DMyAppVersion=${{ inputs.release_tag }}",
+            "/DMyAppVersion=${{ env.RELEASE_TAG }}",
             "/DArch=x64",
             "/DOutputName=warp-cn"
           )
@@ -90,6 +94,6 @@ jobs:
       - name: Upload installer to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag }}
+          tag_name: ${{ env.RELEASE_TAG }}
           files: script\windows\Output\warp-cn.exe
           token: ${{ secrets.GITHUB_TOKEN }}
